@@ -1,4 +1,5 @@
 import { clients } from './https';
+import { getSeliseDataGatewayUrl, getSeliseProjectKey } from './selise-config';
 
 /**
  * GraphQL Client Module
@@ -47,15 +48,9 @@ interface GraphQLClient {
   mutate<T>(request: GraphQLRequest): Promise<T>;
 }
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
-const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+const projectKey = getSeliseProjectKey();
 
-const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-
-export const GRAPHQL_BASE_URL =
-  import.meta.env.VITE_DATA_GATEWAY_URL ||
-  import.meta.env.VITE_GRAPHQL_ENDPOINT ||
-  `${cleanBaseUrl}/uds/v1/gateway`;
+export const GRAPHQL_BASE_URL = getSeliseDataGatewayUrl();
 
 export const graphqlClient: GraphQLClient = {
   async query<T>(request: GraphQLRequest): Promise<T> {

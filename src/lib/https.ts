@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/state/store/auth';
 import { getRefreshToken } from '@/modules/auth/services/auth.service';
 import { isLocalhost } from './utils/localhost-checker/locahost-checker';
+import { getSeliseApiBaseUrl, getSeliseProjectKey } from './selise-config';
 
 /**
  * HTTP Client Module
@@ -82,8 +83,8 @@ export class HttpError extends Error {
   }
 }
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '');
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY ?? '';
+const BASE_URL = getSeliseApiBaseUrl();
+const projectKey = getSeliseProjectKey();
 const localHostChecker = isLocalhost();
 
 export const clients: Https = {

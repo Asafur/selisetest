@@ -1,8 +1,9 @@
 import { LoginOption } from '@/constant/sso';
 import { MFASigninResponse } from './auth.service';
+import { getSeliseApiBaseUrl, getSeliseProjectKey } from '@/lib/selise-config';
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
-const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+const projectKey = getSeliseProjectKey();
+const baseUrl = getSeliseApiBaseUrl();
 
 const safeJsonParse = async (response: Response) => {
   try {
@@ -138,7 +139,20 @@ export const getLoginOption = async (): Promise<LoginOption | null> => {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    const responseText = await response.text();
+
+    if (!contentType.includes('application/json')) {
+      const trimmedResponse = responseText.trim().toLowerCase();
+      const returnedHtml = trimmedResponse.startsWith('<!doctype') || trimmedResponse.startsWith('<html');
+      throw new Error(
+        returnedHtml
+          ? `SELISE login options returned HTML instead of JSON. Check VITE_API_BASE_URL; current value resolves to ${baseUrl}.`
+          : `SELISE login options returned ${contentType || 'an unknown content type'} instead of JSON.`
+      );
+    }
+
+    return JSON.parse(responseText);
   } catch (error) {
     console.error('[SSO] Error fetching login options:', error);
     throw error;

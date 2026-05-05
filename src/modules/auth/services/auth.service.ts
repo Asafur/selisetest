@@ -1,5 +1,6 @@
 import { clients, HttpError } from '@/lib/https';
 import { useAuthStore } from '@/state/store/auth';
+import { getSeliseApiBaseUrl, getSeliseProjectKey } from '@/lib/selise-config';
 import {
   AccountActivationPayload,
   ForgotPasswordPayload,
@@ -111,8 +112,8 @@ export interface SigninByBlocksOidcPayload {
   code: string;
 }
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+const projectKey = getSeliseProjectKey();
+const apiBaseUrl = getSeliseApiBaseUrl();
 
 const getApiUrl = (path: string) => {
   const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;

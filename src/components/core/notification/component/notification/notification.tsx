@@ -11,11 +11,12 @@ import { subscribeNotifications } from '@seliseblocks/notifications';
 import { useAuthStore } from '@/state/store/auth';
 import type { Notification as NotificationType } from '../../types/notification.types';
 import { NotificationSkeletonList } from '../notification-skeleton/notification-skeleton';
+import { getSeliseApiBaseUrl, getSeliseProjectKey } from '@/lib/selise-config';
 
 const PAGE_SIZE = 10;
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
-const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+const projectKey = getSeliseProjectKey();
+const baseUrl = getSeliseApiBaseUrl();
 
 export const Notification = () => {
   const { t } = useTranslation();
