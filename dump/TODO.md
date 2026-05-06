@@ -67,8 +67,6 @@ Last updated: 2026-05-05
 - Verified in the browser that `http://localhost:3000/vibe-builder` shows the builder sidebar, canvas, properties panel, and reference-style landing page blocks.
 - Sampled the newer `vidzz` reference video and applied a scoped dark studio visual layer to VibeBuilder screens.
 - Added animated grid/light-sweep background, glass panels, hover-lift cards, selected-block glow, drag/drop highlighting, and template picker cards.
-- Restyled the Construct auth screen into a VibeBuilder-branded dark login page so protected `/vibe-builder` deep links match the newer reference before login.
-- Removed the full demo password display from the local login banner and replaced it with a non-secret SELISE-backed workspace message.
 - Updated `run-vibebuilder.bat` with default run, `setup`, and `admin` modes.
 - Added `scripts/make-asafur-admin.ps1` to assign `asafur.rahman@northsouth.edu` to an admin-like SELISE IAM role while preserving existing roles.
 - Verified the admin helper fails closed when `SELISE_ACCESS_TOKEN` is missing and makes no role changes.

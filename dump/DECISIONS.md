@@ -16,8 +16,6 @@ Last updated: 2026-05-05
 - Keep `/vibe-builder/sites` and `/admin/sites` as the real SELISE-backed site/project management routes.
 - Apply the newer `vidzz` reference as a style direction only: dark studio surface, glass panels, neon teal/purple/coral accents, animated grid/light sweep, and lifted cards. Do not copy the video 1:1 and do not hardcode video-derived media as production assets.
 - Scope the visual treatment under VibeBuilder classes so Construct navigation, login, and unrelated modules remain intact.
-- Restyle the shared auth layout for this VibeBuilder project because protected builder routes naturally show login first. The auth page should advertise VibeBuilder and SELISE-backed publishing, not generic Construct demo credentials.
-- Do not display full demo passwords in the login banner; keep secrets and credential-like values out of UI/docs.
 - `run-vibebuilder.bat` now has three modes: default dev launch, `setup` for install/lint/build, and `admin` for the SELISE IAM admin helper.
 - Admin assignment for `asafur.rahman@northsouth.edu` must use a current SELISE admin access token in `SELISE_ACCESS_TOKEN`. The helper must fetch current roles first because SELISE `SetRoles` replaces role assignments.
 - The visible `/vibe-builder` workbench may be interactive but remains temporary; real persistence means creating a SELISE Data Gateway `VibeProject` and `VibePage` through `/vibe-builder/sites` or `/admin/sites`, then editing that page so autosave/publish writes to SELISE.
