@@ -7,6 +7,10 @@ type StoredSsoState = {
   createdAt: number;
 };
 
+type RecoveryState = StoredSsoState & {
+  attemptCount: number;
+};
+
 const isBrowser = () => typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined';
 
 const normalizeProvider = (provider?: string | null) => provider?.trim().toLowerCase() ?? '';
@@ -22,10 +26,23 @@ export const getSsoProviderRedirectUrl = (provider: string, providerUrl: string)
   return finalUrl.toString();
 };
 
-export const rememberSsoLoginState = (provider: string, providerUrl: string) => {
+export const clearSsoStateRecovery = () => {
+  if (!isBrowser()) return;
+  window.sessionStorage.removeItem(SSO_RECOVERY_KEY);
+};
+
+export const rememberSsoLoginState = (
+  provider: string,
+  providerUrl: string,
+  options: { resetRecovery?: boolean } = {}
+) => {
   if (!isBrowser()) return;
 
   try {
+    if (options.resetRecovery ?? true) {
+      clearSsoStateRecovery();
+    }
+
     const finalUrl = new URL(providerUrl);
     const state = finalUrl.searchParams.get('state');
 
@@ -67,25 +84,25 @@ export const shouldRecoverSsoState = (provider: string | undefined, state: strin
 
   try {
     const raw = window.sessionStorage.getItem(SSO_RECOVERY_KEY);
-    const recovery = raw ? (JSON.parse(raw) as StoredSsoState) : null;
+    const recovery = raw ? (JSON.parse(raw) as RecoveryState) : null;
     const normalizedProvider = normalizeProvider(provider);
 
-    if (recovery?.provider === normalizedProvider && recovery.state === state) {
+    if (recovery?.provider === normalizedProvider && recovery.attemptCount >= 1) {
       return false;
     }
 
     window.sessionStorage.setItem(
       SSO_RECOVERY_KEY,
-      JSON.stringify({ provider: normalizedProvider, state, createdAt: Date.now() })
+      JSON.stringify({
+        provider: normalizedProvider,
+        state,
+        createdAt: Date.now(),
+        attemptCount: 1,
+      })
     );
 
     return true;
   } catch {
     return false;
   }
-};
-
-export const clearSsoStateRecovery = () => {
-  if (!isBrowser()) return;
-  window.sessionStorage.removeItem(SSO_RECOVERY_KEY);
 };

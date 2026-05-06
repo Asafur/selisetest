@@ -84,7 +84,7 @@ const restartSsoFlow = async (provider?: string): Promise<boolean> => {
 
   if (res.error || !res.providerUrl) return false;
 
-  rememberSsoLoginState(ssoInfo.provider, res.providerUrl);
+  rememberSsoLoginState(ssoInfo.provider, res.providerUrl, { resetRecovery: false });
   window.location.replace(getSsoProviderRedirectUrl(ssoInfo.provider, res.providerUrl));
   return true;
 };
