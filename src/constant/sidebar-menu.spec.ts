@@ -3,7 +3,7 @@ import { menuItems } from '../constant/sidebar-menu';
 describe('menuItems', () => {
   test('should have the correct structure', () => {
     expect(Array.isArray(menuItems)).toBe(true);
-    expect(menuItems.length).toBe(14);
+    expect(menuItems.length).toBe(15);
   });
 
   test('each menu item should have required properties', () => {
@@ -44,6 +44,12 @@ describe('menuItems', () => {
       expect(iamItem.path).toBe('/identity-management');
       expect(iamItem.icon).toBe('Users');
     }
+  });
+
+  test('Vibe Builder should open the real SELISE-backed sites flow', () => {
+    const vibeBuilderItem = menuItems.find((item) => item.id === 'vibebuilder');
+    expect(vibeBuilderItem).toBeDefined();
+    expect(vibeBuilderItem?.path).toBe('/vibe-builder/sites');
   });
 
   test('all paths should start with a slash', () => {

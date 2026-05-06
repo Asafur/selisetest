@@ -77,7 +77,7 @@ export const SitesPage = () => {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
-            <Link to="/vibe-builder">Open builder</Link>
+            <Link to="/vibe-builder/sites">All sites</Link>
           </Button>
           <Button asChild>
             <a href="#create-site">

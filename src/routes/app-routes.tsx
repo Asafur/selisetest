@@ -18,7 +18,6 @@ import { TaskManagerPage } from '@/modules/task-manager';
 import { ProfilePage } from '@/modules/profile';
 import { UsersTablePage } from '@/modules/iam';
 import {
-  BuilderWorkbenchPage,
   LiveSitePage,
   MediaPage,
   PageBuilderPage,
@@ -83,7 +82,7 @@ export const AppRoutes = () => {
                 <Route path="/admin/sites/:siteId/users" element={<SiteUsersPage />} />
                 <Route path="/admin/websites" element={<Navigate to="/admin/sites" />} />
                 <Route path="/admin/websites/new" element={<Navigate to="/admin/sites/new" />} />
-                <Route path="/vibe-builder" element={<BuilderWorkbenchPage />} />
+                <Route path="/vibe-builder" element={<Navigate to="/vibe-builder/sites" replace />} />
                 <Route path="/vibe-builder/sites" element={<SitesPage />} />
                 <Route path="/vibe-builder/:siteId" element={<SitePagesPage />} />
                 <Route path="/vibe-builder/:siteId/pages" element={<SitePagesPage />} />

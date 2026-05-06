@@ -47,7 +47,7 @@ export const LiveSitePage = () => {
             The site/page either is not published or public SELISE read access is not configured.
           </p>
           <Button className="mt-5" asChild>
-            <Link to="/vibe-builder">Open builder</Link>
+            <Link to="/vibe-builder/sites">Open builder</Link>
           </Button>
         </div>
       </div>

@@ -41,7 +41,7 @@ export const menuItems: MenuItem[] = [
   createMenuItem('task-manager', 'TASK_MANAGER', '/task-manager', 'Presentation', {
     isIntegrated: true,
   }),
-  createMenuItem('vibebuilder', 'VIBE_BUILDER', '/vibe-builder', 'Presentation', {
+  createMenuItem('vibebuilder', 'VIBE_BUILDER', '/vibe-builder/sites', 'Presentation', {
     isIntegrated: true,
   }),
   createMenuItem('dashboard', 'DASHBOARD', '/dashboard', 'LayoutDashboard'),

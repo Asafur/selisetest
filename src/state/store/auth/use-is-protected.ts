@@ -16,13 +16,29 @@ const ADMIN_ROLE_ALIASES = new Set([
   'superadmin',
 ]);
 
-const normalizeRole = (role: string): string =>
-  role
+const roleToString = (role: unknown): string => {
+  if (typeof role === 'string') return role;
+  if (!role || typeof role !== 'object') return '';
+
+  const record = role as Record<string, unknown>;
+  return String(
+    record.slug ||
+      record.name ||
+      record.role ||
+      record.roleName ||
+      record.roleSlug ||
+      record.value ||
+      ''
+  );
+};
+
+const normalizeRole = (role: unknown): string =>
+  roleToString(role)
     .trim()
     .toLowerCase()
     .replace(/[\s_-]+/g, '');
 
-const rolesMatch = (userRole: string, requiredRole: string): boolean => {
+const rolesMatch = (userRole: unknown, requiredRole: string): boolean => {
   const normalizedUserRole = normalizeRole(userRole);
   const normalizedRequiredRole = normalizeRole(requiredRole);
 
@@ -37,7 +53,7 @@ const getCurrentOrgRoles = (
   user: any,
   accessToken: string | null,
   selectedOrgId: string | null
-): string[] => {
+): unknown[] => {
   const rootRoles = user?.roles ?? [];
 
   if (!user?.memberships?.length || !accessToken) return rootRoles;
@@ -51,7 +67,7 @@ const getCurrentOrgRoles = (
   return membership?.roles ?? rootRoles;
 };
 
-const checkAllRoles = (userRoles: string[] | undefined, requiredRoles: string[]): boolean => {
+const checkAllRoles = (userRoles: unknown[] | undefined, requiredRoles: string[]): boolean => {
   if (requiredRoles.length === 0) return true;
   return requiredRoles.every((role) =>
     userRoles?.some((userRole) => rolesMatch(userRole, role))
@@ -66,7 +82,7 @@ const checkAllPermissions = (
   return requiredPermissions.every((permission) => userPermissions?.includes(permission));
 };
 
-const checkAnyRole = (userRoles: string[] | undefined, requiredRoles: string[]): boolean => {
+const checkAnyRole = (userRoles: unknown[] | undefined, requiredRoles: string[]): boolean => {
   if (requiredRoles.length === 0) return false;
   return requiredRoles.some((role) =>
     userRoles?.some((userRole) => rolesMatch(userRole, role))
