@@ -8,21 +8,54 @@ type UseIsProtectedOptions = {
   opt?: 'all' | 'any';
 };
 
-const getCurrentOrgRoles = (user: any, accessToken: string | null): string[] => {
-  if (!user?.memberships?.length || !accessToken) return [];
+const ADMIN_ROLE_ALIASES = new Set([
+  'admin',
+  'administrator',
+  'cloudadmin',
+  'cloudadministrator',
+  'superadmin',
+]);
+
+const normalizeRole = (role: string): string =>
+  role
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '');
+
+const rolesMatch = (userRole: string, requiredRole: string): boolean => {
+  const normalizedUserRole = normalizeRole(userRole);
+  const normalizedRequiredRole = normalizeRole(requiredRole);
+
+  if (normalizedRequiredRole === 'admin') {
+    return ADMIN_ROLE_ALIASES.has(normalizedUserRole);
+  }
+
+  return normalizedUserRole === normalizedRequiredRole;
+};
+
+const getCurrentOrgRoles = (
+  user: any,
+  accessToken: string | null,
+  selectedOrgId: string | null
+): string[] => {
+  const rootRoles = user?.roles ?? [];
+
+  if (!user?.memberships?.length || !accessToken) return rootRoles;
 
   const decoded = decodeJWT(accessToken);
-  const currentOrgId = decoded?.org_id;
+  const currentOrgId = selectedOrgId ?? decoded?.org_id;
 
-  if (!currentOrgId) return [];
+  if (!currentOrgId) return rootRoles;
 
   const membership = user.memberships.find((m: any) => m.organizationId === currentOrgId);
-  return membership?.roles ?? [];
+  return membership?.roles ?? rootRoles;
 };
 
 const checkAllRoles = (userRoles: string[] | undefined, requiredRoles: string[]): boolean => {
   if (requiredRoles.length === 0) return true;
-  return requiredRoles.every((role) => userRoles?.includes(role));
+  return requiredRoles.every((role) =>
+    userRoles?.some((userRole) => rolesMatch(userRole, role))
+  );
 };
 
 const checkAllPermissions = (
@@ -35,7 +68,9 @@ const checkAllPermissions = (
 
 const checkAnyRole = (userRoles: string[] | undefined, requiredRoles: string[]): boolean => {
   if (requiredRoles.length === 0) return false;
-  return requiredRoles.some((role) => userRoles?.includes(role));
+  return requiredRoles.some((role) =>
+    userRoles?.some((userRole) => rolesMatch(userRole, role))
+  );
 };
 
 const checkAnyPermission = (
@@ -51,13 +86,13 @@ export const useIsProtected = ({
   permissions = [],
   opt = 'any',
 }: UseIsProtectedOptions = {}) => {
-  const { user, isAuthenticated, accessToken } = useAuthStore();
+  const { user, isAuthenticated, accessToken, selectedOrgId } = useAuthStore();
 
   const isProtected = useMemo(() => {
     if (!isAuthenticated || !user) return false;
     if (roles.length === 0 && permissions.length === 0) return false;
 
-    const userRoles = getCurrentOrgRoles(user, accessToken);
+    const userRoles = getCurrentOrgRoles(user, accessToken, selectedOrgId);
 
     if (opt === 'all') {
       const hasAllRoles = checkAllRoles(userRoles, roles);
@@ -68,7 +103,7 @@ export const useIsProtected = ({
     const hasAnyRole = checkAnyRole(userRoles, roles);
     const hasAnyPermission = checkAnyPermission(user.permissions, permissions);
     return hasAnyRole || hasAnyPermission;
-  }, [isAuthenticated, user, accessToken, roles, permissions, opt]);
+  }, [isAuthenticated, user, accessToken, selectedOrgId, roles, permissions, opt]);
 
   return {
     isProtected,
