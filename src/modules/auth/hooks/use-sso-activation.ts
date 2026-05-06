@@ -22,11 +22,9 @@ const SSO_CALLBACK_FAILED_FALLBACK =
 const SSO_STATE_EXPIRED_FALLBACK =
   'Your SSO sign-in session expired. Please start Google sign-in again.';
 const SSO_STATE_REJECTED_FALLBACK =
-  'SELISE Identity rejected this Google sign-in state even after a fresh retry. Check the Google SSO credential in SELISE Identity, then start Google sign-in again.';
+  'This Google sign-in state was already used or rejected by SELISE Identity. Please start Google sign-in again.';
 const SSO_NETWORK_FAILED_FALLBACK =
   'The browser could not reach SELISE Identity. Check your connection or browser shields, then start Google sign-in again.';
-
-const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
 
 const stringifyError = (error: any): string =>
   `${error?.message || ''} ${JSON.stringify(error?.error || {})} ${JSON.stringify(
@@ -118,14 +116,7 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
           code: code as string,
           state: state as string,
         };
-        const res = await mutateAsync(payload).catch(async (error) => {
-          if (!isNetworkFetchError(stringifyError(error))) {
-            throw error;
-          }
-
-          await wait(600);
-          return mutateAsync(payload);
-        });
+        const res = await mutateAsync(payload);
 
         // mutateAsync<'social'> returns SignInResponse | MFASigninResponse
         // But for social login, it typically returns SignInResponse
