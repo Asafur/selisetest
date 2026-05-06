@@ -97,7 +97,9 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
     }
 
     if (effectRan.current) {
-      navigate('/login', { replace: true });
+      // In dev StrictMode, effects can run twice on mount. Navigating away here
+      // can cancel the in-flight token exchange and show up as ERR_FAILED / Failed to fetch.
+      // Deduplication is handled via startSsoCallbackExchange(), so on re-run we no-op.
       return;
     }
 

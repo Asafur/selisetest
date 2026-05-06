@@ -28,8 +28,10 @@ const appDomain =
   pick('VITE_SELISE_APP_DOMAIN', 'SELISE_APP_DOMAIN', 'APP_DOMAIN') ||
   'https://pnuasg-dzdlq.seliseblocks.com';
 const projectKey =
+  // Never hardcode real Blocks keys in source. Provide them via deployment env vars
+  // (X_BLOCKS_KEY / VITE_X_BLOCKS_KEY) or via local, gitignored .env.<env> files.
   pick('VITE_X_BLOCKS_KEY', 'X_BLOCKS_KEY', 'SELISE_X_BLOCKS_KEY') ||
-  'P8d53101e85884a6fbb63551ddc61c63f';
+  '';
 
 const generatedValues = {
   VITE_BLOCKS_API_URL: pick('VITE_BLOCKS_API_URL', 'BLOCKS_API_URL', 'BLOCKS_API_BASE_URL') || apiBaseUrl,

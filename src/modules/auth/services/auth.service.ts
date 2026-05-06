@@ -185,7 +185,9 @@ export const signin = async <
         'Content-Type': 'application/x-www-form-urlencoded',
         'x-blocks-key': projectKey,
       },
-      credentials: 'omit',
+      // Blocks ties the issued `state` to the browser session. Omitting credentials
+      // drops that cookie and results in `state_data_not_found` even for fresh retries.
+      credentials: 'include',
     });
 
     if (!response.ok) {

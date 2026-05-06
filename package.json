@@ -8,7 +8,7 @@
     "dev": "vite --port 3000",
     "start": "vite --port 3000",
     "start:host": "vite --host pnuasg-dzdlq.seliseblocks.com --port 3000",
-    "build": "vite build",
+    "build": "npm run set-env && vite build",
     "preview": "vite preview",
     "set-env": "node set-env.cjs",
     "build:dev": "BUILD_ENV=dev npm run set-env && vite build",
