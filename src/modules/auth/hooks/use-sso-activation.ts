@@ -14,6 +14,10 @@ const SSO_CALLBACK_FAILED_FALLBACK =
   'SSO sign-in could not be completed. Please start Google sign-in again.';
 const SSO_STATE_EXPIRED_FALLBACK =
   'Your SSO sign-in session expired. Please start Google sign-in again.';
+const SSO_NETWORK_FAILED_FALLBACK =
+  'The browser could not reach SELISE Identity. Check your connection or browser shields, then start Google sign-in again.';
+
+const wait = (duration: number) => new Promise((resolve) => window.setTimeout(resolve, duration));
 
 const stringifyError = (error: any): string =>
   `${error?.message || ''} ${JSON.stringify(error?.error || {})} ${JSON.stringify(
@@ -43,6 +47,9 @@ const isNoSuchEmailError = (errorPayloadStr: string): boolean =>
     'sso signup is disabled',
     'sso sign-up is disabled',
   ].some((marker) => errorPayloadStr.includes(marker));
+
+const isNetworkFetchError = (errorPayloadStr: string): boolean =>
+  errorPayloadStr.includes('failed to fetch') || errorPayloadStr.includes('networkerror');
 
 function getSsoActivationPath(url: string, provider?: string): string | null {
   const queryPart = url.split('?')[1];
@@ -91,10 +98,18 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
 
     async function activate() {
       try {
-        const res = await mutateAsync({
-          grantType: 'social',
+        const payload = {
+          grantType: 'social' as const,
           code: code as string,
           state: state as string,
+        };
+        const res = await mutateAsync(payload).catch(async (error) => {
+          if (!isNetworkFetchError(stringifyError(error))) {
+            throw error;
+          }
+
+          await wait(600);
+          return mutateAsync(payload);
         });
 
         // mutateAsync<'social'> returns SignInResponse | MFASigninResponse
@@ -144,6 +159,15 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
             ? noSuchEmailTemplate.replace('---', ` (${emailTarget})`)
             : noSuchEmailTemplate.replace('---', ``);
           navigate('/login', { replace: true, state: { ssoError: errorMsg } });
+        } else if (isNetworkFetchError(errorPayloadStr)) {
+          navigate('/login', {
+            replace: true,
+            state: {
+              ssoError: t('SSO_NETWORK_FAILED', {
+                defaultValue: SSO_NETWORK_FAILED_FALLBACK,
+              }),
+            },
+          });
         } else {
           navigate('/login', {
             replace: true,
