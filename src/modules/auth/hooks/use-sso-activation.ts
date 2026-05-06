@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useAuthStore } from '@/state/store/auth';
 import { useSigninMutation } from '@/modules/auth/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -11,6 +10,39 @@ import {
 
 const NO_SUCH_EMAIL_FALLBACK =
   'No account exists for this email. Ask an admin to invite the user or enable SSO sign-up in SELISE Identity.';
+const SSO_CALLBACK_FAILED_FALLBACK =
+  'SSO sign-in could not be completed. Please start Google sign-in again.';
+const SSO_STATE_EXPIRED_FALLBACK =
+  'Your SSO sign-in session expired. Please start Google sign-in again.';
+
+const stringifyError = (error: any): string =>
+  `${error?.message || ''} ${JSON.stringify(error?.error || {})} ${JSON.stringify(
+    error || {}
+  )}`.toLowerCase();
+
+const getBackendErrorMessage = (error: any): string | null => {
+  const backendError = error?.error;
+
+  return (
+    backendError?.error_description ||
+    backendError?.message ||
+    error?.error_description ||
+    error?.message ||
+    null
+  );
+};
+
+const isNoSuchEmailError = (errorPayloadStr: string): boolean =>
+  [
+    'no account',
+    'no such email',
+    'email_not_found',
+    'user_not_found',
+    'user does not exist',
+    'account does not exist',
+    'sso signup is disabled',
+    'sso sign-up is disabled',
+  ].some((marker) => errorPayloadStr.includes(marker));
 
 function getSsoActivationPath(url: string, provider?: string): string | null {
   const queryPart = url.split('?')[1];
@@ -37,7 +69,6 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
   const [searchParams] = useSearchParams();
   const { login, logout: setUnAuthenticated, setTokens } = useAuthStore();
   const { mutateAsync, isPending } = useSigninMutation<'social'>({ suppressToast: true });
-  const { toast } = useToast();
 
   const code = searchParams.get('code');
   const state = searchParams.get('state');
@@ -92,18 +123,19 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
         console.error('SSO Callback error:', error);
         setUnAuthenticated();
 
-        const errorPayloadStr = `${error?.message || ''} ${JSON.stringify(
-          error?.error || {}
-        )} ${JSON.stringify(error || {})}`.toLowerCase();
+        const errorPayloadStr = stringifyError(error);
+        const backendMessage = getBackendErrorMessage(error);
 
         if (errorPayloadStr.includes('state_data_not_found')) {
-          toast({
-            title: 'ERROR',
-            description: t('VERIFICATION_FAILED_PLEASE_TRY_AGAIN'),
-            variant: 'destructive',
+          navigate('/login', {
+            replace: true,
+            state: {
+              ssoError: t('SSO_STATE_EXPIRED', {
+                defaultValue: SSO_STATE_EXPIRED_FALLBACK,
+              }),
+            },
           });
-        } else {
-          // if any error, we consider, user is not on the system and signup sso is disabled
+        } else if (isNoSuchEmailError(errorPayloadStr)) {
           const emailTarget = error?.error?.error_description?.split(' ')[0];
           const noSuchEmailTemplate = t('NO_SUCH_EMAIL_MESSAGE', {
             defaultValue: NO_SUCH_EMAIL_FALLBACK,
@@ -111,12 +143,20 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
           const errorMsg = emailTarget
             ? noSuchEmailTemplate.replace('---', ` (${emailTarget})`)
             : noSuchEmailTemplate.replace('---', ``);
-          navigate(`/login`, { state: { ssoError: errorMsg } });
-          effectRan.current = false;
-          return;
+          navigate('/login', { replace: true, state: { ssoError: errorMsg } });
+        } else {
+          navigate('/login', {
+            replace: true,
+            state: {
+              ssoError:
+                backendMessage ||
+                t('SSO_CALLBACK_FAILED', {
+                  defaultValue: SSO_CALLBACK_FAILED_FALLBACK,
+                }),
+            },
+          });
         }
 
-        navigate('/login', { replace: true });
         effectRan.current = false;
       }
     }
@@ -131,7 +171,6 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
     login,
     setUnAuthenticated,
     provider,
-    toast,
     setTokens,
     t,
   ]);
