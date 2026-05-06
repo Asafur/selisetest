@@ -25,6 +25,8 @@ const SSO_STATE_REJECTED_FALLBACK =
   'This Google sign-in state was already used or rejected by SELISE Identity. Please start Google sign-in again.';
 const SSO_NETWORK_FAILED_FALLBACK =
   'The browser could not reach SELISE Identity. Check your connection or browser shields, then start Google sign-in again.';
+const SSO_TOKEN_EXCHANGE_FAILED_FALLBACK =
+  'SELISE Identity could not exchange this Google sign-in code. Check the Google Client Secret, Redirect URL, and Audience in SELISE Identity, then start Google sign-in again.';
 
 const stringifyError = (error: any): string =>
   `${error?.message || ''} ${JSON.stringify(error?.error || {})} ${JSON.stringify(
@@ -159,9 +161,12 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
 
         const errorPayloadStr = stringifyError(error);
         const backendMessage = getBackendErrorMessage(error);
+        const stateWasExpected = wasExpectedSsoState(provider, state as string);
+
+        clearSsoLoginState();
+        clearSsoStateRecovery();
 
         if (errorPayloadStr.includes('state_data_not_found')) {
-          const stateWasExpected = wasExpectedSsoState(provider, state as string);
           navigate('/login', {
             replace: true,
             state: {
@@ -187,9 +192,13 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
           navigate('/login', {
             replace: true,
             state: {
-              ssoError: t('SSO_NETWORK_FAILED', {
-                defaultValue: SSO_NETWORK_FAILED_FALLBACK,
-              }),
+              ssoError: stateWasExpected
+                ? t('SSO_TOKEN_EXCHANGE_FAILED', {
+                    defaultValue: SSO_TOKEN_EXCHANGE_FAILED_FALLBACK,
+                  })
+                : t('SSO_NETWORK_FAILED', {
+                    defaultValue: SSO_NETWORK_FAILED_FALLBACK,
+                  }),
             },
           });
         } else {
