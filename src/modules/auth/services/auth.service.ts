@@ -185,7 +185,7 @@ export const signin = async <
         'Content-Type': 'application/x-www-form-urlencoded',
         'x-blocks-key': projectKey,
       },
-      credentials: 'include',
+      credentials: 'omit',
     });
 
     if (!response.ok) {
