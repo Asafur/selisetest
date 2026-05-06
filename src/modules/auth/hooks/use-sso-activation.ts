@@ -7,13 +7,11 @@ import {
   clearRedirectAfterLogin,
   getRedirectAfterLogin,
 } from '@/modules/auth/utils/redirect-after-login';
-import { SSOservice, getLoginOption } from '@/modules/auth/services/sso.service';
 import {
+  clearSsoCallbackExchange,
   clearSsoLoginState,
   clearSsoStateRecovery,
-  getSsoProviderRedirectUrl,
-  rememberSsoLoginState,
-  shouldRecoverSsoState,
+  startSsoCallbackExchange,
   wasExpectedSsoState,
 } from '@/modules/auth/utils/sso-state';
 
@@ -62,33 +60,6 @@ const isNoSuchEmailError = (errorPayloadStr: string): boolean =>
 const isNetworkFetchError = (errorPayloadStr: string): boolean =>
   errorPayloadStr.includes('failed to fetch') || errorPayloadStr.includes('networkerror');
 
-const normalizeProvider = (provider?: string | null) => provider?.trim().toLowerCase();
-
-const restartSsoFlow = async (provider?: string): Promise<boolean> => {
-  const normalizedProvider = normalizeProvider(provider);
-  if (!normalizedProvider) return false;
-
-  const loginOptions = await getLoginOption();
-  const ssoInfo = loginOptions?.ssoInfo?.find(
-    (info) => normalizeProvider(info.provider) === normalizedProvider
-  );
-
-  if (!ssoInfo?.audience) return false;
-
-  const ssoService = new SSOservice();
-  const res = await ssoService.getSocialLoginEndpoint({
-    provider: ssoInfo.provider,
-    audience: ssoInfo.audience,
-    sendAsResponse: true,
-  });
-
-  if (res.error || !res.providerUrl) return false;
-
-  rememberSsoLoginState(ssoInfo.provider, res.providerUrl, { resetRecovery: false });
-  window.location.replace(getSsoProviderRedirectUrl(ssoInfo.provider, res.providerUrl));
-  return true;
-};
-
 function getSsoActivationPath(url: string, provider?: string): string | null {
   const queryPart = url.split('?')[1];
   if (!queryPart) return null;
@@ -136,6 +107,12 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
 
     async function activate() {
       try {
+        const exchangeStarted = startSsoCallbackExchange(provider, state as string);
+
+        if (!exchangeStarted) {
+          return;
+        }
+
         const payload = {
           grantType: 'social' as const,
           code: code as string,
@@ -153,6 +130,7 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
         // mutateAsync<'social'> returns SignInResponse | MFASigninResponse
         // But for social login, it typically returns SignInResponse
         if ('access_token' in res && res.access_token) {
+          clearSsoCallbackExchange();
           clearSsoLoginState();
           clearSsoStateRecovery();
           login(res.access_token, res.refresh_token ?? '');
@@ -168,33 +146,28 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
             : null;
 
         if (activationPath) {
+          clearSsoCallbackExchange();
           clearSsoLoginState();
           clearSsoStateRecovery();
           return navigate(activationPath, { replace: true });
         }
         if ('enable_mfa' in res && res.enable_mfa) {
+          clearSsoCallbackExchange();
           clearSsoLoginState();
           clearSsoStateRecovery();
           return navigate(`/verify-mfa?mfa_id=${res.mfaId}&mfa_type=${res.mfaType}`);
         }
+        clearSsoCallbackExchange();
         navigate('/login', { replace: true });
       } catch (error: any) {
         console.error('SSO Callback error:', error);
         setUnAuthenticated();
+        clearSsoCallbackExchange();
 
         const errorPayloadStr = stringifyError(error);
         const backendMessage = getBackendErrorMessage(error);
 
         if (errorPayloadStr.includes('state_data_not_found')) {
-          if (shouldRecoverSsoState(provider, state as string)) {
-            try {
-              const recoveryStarted = await restartSsoFlow(provider);
-              if (recoveryStarted) return;
-            } catch (recoveryError) {
-              console.error('SSO state recovery failed:', recoveryError);
-            }
-          }
-
           const stateWasExpected = wasExpectedSsoState(provider, state as string);
           navigate('/login', {
             replace: true,
@@ -238,8 +211,6 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
             },
           });
         }
-
-        effectRan.current = false;
       }
     }
 

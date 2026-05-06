@@ -1,5 +1,7 @@
 const SSO_LOGIN_STATE_KEY = 'selise:sso-login-state';
 const SSO_RECOVERY_KEY = 'selise:sso-state-recovery';
+const SSO_CALLBACK_EXCHANGE_KEY = 'selise:sso-callback-exchange';
+const CALLBACK_EXCHANGE_LOCK_TTL_MS = 2 * 60 * 1000;
 
 type StoredSsoState = {
   provider: string;
@@ -10,6 +12,8 @@ type StoredSsoState = {
 type RecoveryState = StoredSsoState & {
   attemptCount: number;
 };
+
+type CallbackExchangeState = StoredSsoState;
 
 const isBrowser = () => typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined';
 
@@ -29,6 +33,11 @@ export const getSsoProviderRedirectUrl = (provider: string, providerUrl: string)
 export const clearSsoStateRecovery = () => {
   if (!isBrowser()) return;
   window.sessionStorage.removeItem(SSO_RECOVERY_KEY);
+};
+
+export const clearSsoCallbackExchange = () => {
+  if (!isBrowser()) return;
+  window.sessionStorage.removeItem(SSO_CALLBACK_EXCHANGE_KEY);
 };
 
 export const rememberSsoLoginState = (
@@ -104,5 +113,34 @@ export const shouldRecoverSsoState = (provider: string | undefined, state: strin
     return true;
   } catch {
     return false;
+  }
+};
+
+export const startSsoCallbackExchange = (provider: string | undefined, state: string): boolean => {
+  if (!isBrowser()) return true;
+
+  try {
+    const normalizedProvider = normalizeProvider(provider);
+    const raw = window.sessionStorage.getItem(SSO_CALLBACK_EXCHANGE_KEY);
+    const active = raw ? (JSON.parse(raw) as CallbackExchangeState) : null;
+    const isActive =
+      active?.provider === normalizedProvider &&
+      active.state === state &&
+      Date.now() - active.createdAt < CALLBACK_EXCHANGE_LOCK_TTL_MS;
+
+    if (isActive) return false;
+
+    window.sessionStorage.setItem(
+      SSO_CALLBACK_EXCHANGE_KEY,
+      JSON.stringify({
+        provider: normalizedProvider,
+        state,
+        createdAt: Date.now(),
+      })
+    );
+
+    return true;
+  } catch {
+    return true;
   }
 };
