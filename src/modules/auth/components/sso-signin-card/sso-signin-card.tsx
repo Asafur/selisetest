@@ -1,7 +1,12 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { SocialAuthProvider } from '@/constant/sso';
 import { SSOservice, SSOLoginResponse } from '../../services/sso.service';
 import { Button } from '@/components/ui-kit/button';
+import {
+  getSsoProviderRedirectUrl,
+  rememberSsoLoginState,
+} from '@/modules/auth/utils/sso-state';
 
 type SSOSigninCardProps = {
   providerConfig: SocialAuthProvider & {
@@ -20,6 +25,7 @@ const SSOSigninCard = ({
 }: Readonly<SSOSigninCardProps>) => {
   const ssoService = new SSOservice();
   const navigate = useNavigate();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const getButtonWidth = () => {
     if (showText) return 'w-full';
@@ -43,6 +49,10 @@ const SSOSigninCard = ({
       e.preventDefault();
       e.stopPropagation();
 
+      if (isRedirecting) {
+        return;
+      }
+
       if (!providerConfig.isAvailable) {
         return;
       }
@@ -64,10 +74,12 @@ const SSOSigninCard = ({
         sendAsResponse: true,
       };
 
+      setIsRedirecting(true);
       const res: SSOLoginResponse = await ssoService.getSocialLoginEndpoint(requestPayload);
 
       if (res.error) {
         console.error('[SSO Button] Authentication error:', res.error);
+        setIsRedirecting(false);
         return alert(`Authentication error: ${res.error}`);
       }
 
@@ -80,11 +92,14 @@ const SSOSigninCard = ({
 
       // Regular SSO flow
       if (!res.providerUrl) {
+        setIsRedirecting(false);
         return alert('No redirect URL received from the authentication service.');
       }
 
-      window.location.href = res.providerUrl;
+      rememberSsoLoginState(providerConfig.provider, res.providerUrl);
+      window.location.href = getSsoProviderRedirectUrl(providerConfig.provider, res.providerUrl);
     } catch (error) {
+      setIsRedirecting(false);
       console.error('[SSO Button] === UNEXPECTED ERROR ===');
       console.error('[SSO Button] Error details:', error);
       console.error(
@@ -100,7 +115,13 @@ const SSOSigninCard = ({
   };
 
   const buttonContent = (
-    <Button variant="outline" className={`${getButtonWidth()} h-12`} onClick={onClickHandler}>
+    <Button
+      variant="outline"
+      className={`${getButtonWidth()} h-12`}
+      onClick={onClickHandler}
+      disabled={isRedirecting}
+      aria-busy={isRedirecting}
+    >
       <img
         src={providerConfig.imageSrc}
         width={20}

@@ -7,6 +7,15 @@ import {
   clearRedirectAfterLogin,
   getRedirectAfterLogin,
 } from '@/modules/auth/utils/redirect-after-login';
+import { SSOservice, getLoginOption } from '@/modules/auth/services/sso.service';
+import {
+  clearSsoLoginState,
+  clearSsoStateRecovery,
+  getSsoProviderRedirectUrl,
+  rememberSsoLoginState,
+  shouldRecoverSsoState,
+  wasExpectedSsoState,
+} from '@/modules/auth/utils/sso-state';
 
 const NO_SUCH_EMAIL_FALLBACK =
   'No account exists for this email. Ask an admin to invite the user or enable SSO sign-up in SELISE Identity.';
@@ -14,6 +23,8 @@ const SSO_CALLBACK_FAILED_FALLBACK =
   'SSO sign-in could not be completed. Please start Google sign-in again.';
 const SSO_STATE_EXPIRED_FALLBACK =
   'Your SSO sign-in session expired. Please start Google sign-in again.';
+const SSO_STATE_REJECTED_FALLBACK =
+  'SELISE Identity rejected this Google sign-in state even after a fresh retry. Check the Google SSO credential in SELISE Identity, then start Google sign-in again.';
 const SSO_NETWORK_FAILED_FALLBACK =
   'The browser could not reach SELISE Identity. Check your connection or browser shields, then start Google sign-in again.';
 
@@ -50,6 +61,33 @@ const isNoSuchEmailError = (errorPayloadStr: string): boolean =>
 
 const isNetworkFetchError = (errorPayloadStr: string): boolean =>
   errorPayloadStr.includes('failed to fetch') || errorPayloadStr.includes('networkerror');
+
+const normalizeProvider = (provider?: string | null) => provider?.trim().toLowerCase();
+
+const restartSsoFlow = async (provider?: string): Promise<boolean> => {
+  const normalizedProvider = normalizeProvider(provider);
+  if (!normalizedProvider) return false;
+
+  const loginOptions = await getLoginOption();
+  const ssoInfo = loginOptions?.ssoInfo?.find(
+    (info) => normalizeProvider(info.provider) === normalizedProvider
+  );
+
+  if (!ssoInfo?.audience) return false;
+
+  const ssoService = new SSOservice();
+  const res = await ssoService.getSocialLoginEndpoint({
+    provider: ssoInfo.provider,
+    audience: ssoInfo.audience,
+    sendAsResponse: true,
+  });
+
+  if (res.error || !res.providerUrl) return false;
+
+  rememberSsoLoginState(ssoInfo.provider, res.providerUrl);
+  window.location.replace(getSsoProviderRedirectUrl(ssoInfo.provider, res.providerUrl));
+  return true;
+};
 
 function getSsoActivationPath(url: string, provider?: string): string | null {
   const queryPart = url.split('?')[1];
@@ -115,6 +153,8 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
         // mutateAsync<'social'> returns SignInResponse | MFASigninResponse
         // But for social login, it typically returns SignInResponse
         if ('access_token' in res && res.access_token) {
+          clearSsoLoginState();
+          clearSsoStateRecovery();
           login(res.access_token, res.refresh_token ?? '');
           setTokens({ accessToken: res.access_token, refreshToken: res.refresh_token ?? '' });
           const redirectAfterLogin = getRedirectAfterLogin(undefined, '/dashboard');
@@ -128,9 +168,13 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
             : null;
 
         if (activationPath) {
+          clearSsoLoginState();
+          clearSsoStateRecovery();
           return navigate(activationPath, { replace: true });
         }
         if ('enable_mfa' in res && res.enable_mfa) {
+          clearSsoLoginState();
+          clearSsoStateRecovery();
           return navigate(`/verify-mfa?mfa_id=${res.mfaId}&mfa_type=${res.mfaType}`);
         }
         navigate('/login', { replace: true });
@@ -142,12 +186,26 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
         const backendMessage = getBackendErrorMessage(error);
 
         if (errorPayloadStr.includes('state_data_not_found')) {
+          if (shouldRecoverSsoState(provider, state as string)) {
+            try {
+              const recoveryStarted = await restartSsoFlow(provider);
+              if (recoveryStarted) return;
+            } catch (recoveryError) {
+              console.error('SSO state recovery failed:', recoveryError);
+            }
+          }
+
+          const stateWasExpected = wasExpectedSsoState(provider, state as string);
           navigate('/login', {
             replace: true,
             state: {
-              ssoError: t('SSO_STATE_EXPIRED', {
-                defaultValue: SSO_STATE_EXPIRED_FALLBACK,
-              }),
+              ssoError: stateWasExpected
+                ? t('SSO_STATE_REJECTED', {
+                    defaultValue: SSO_STATE_REJECTED_FALLBACK,
+                  })
+                : t('SSO_STATE_EXPIRED', {
+                    defaultValue: SSO_STATE_EXPIRED_FALLBACK,
+                  }),
             },
           });
         } else if (isNoSuchEmailError(errorPayloadStr)) {

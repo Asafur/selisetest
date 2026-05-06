@@ -9,6 +9,10 @@ import { useAuthStore } from '@/state/store/auth';
 import { SSOservice } from '../../services/sso.service';
 import { SOCIAL_AUTH_PROVIDERS, SSO_PROVIDERS } from '@/constant/sso';
 import { useToast } from '@/hooks/use-toast';
+import {
+  getSsoProviderRedirectUrl,
+  rememberSsoLoginState,
+} from '@/modules/auth/utils/sso-state';
 
 export const SsoSignupForm = ({ email, provider }: { email: string; provider: string }) => {
   const { t } = useTranslation();
@@ -73,13 +77,8 @@ export const SsoSignupForm = ({ email, provider }: { email: string; provider: st
         }
 
         if (res.providerUrl) {
-          const finalUrl = new URL(res.providerUrl);
-          // Google's OAuth 2.0 endpoint throws an error when
-          // both approval_prompt and prompt parameters are provided simultaneously
-          // because they conflict with each other
-          finalUrl.searchParams.delete('approval_prompt');
-          finalUrl.searchParams.set('prompt', 'select_account');
-          window.location.href = finalUrl.toString();
+          rememberSsoLoginState(provider, res.providerUrl);
+          window.location.href = getSsoProviderRedirectUrl(provider, res.providerUrl);
         }
       } catch (error) {
         console.error('Failed to get alternative account URL:', error);
