@@ -28,6 +28,9 @@ For local dev, Vite forwards `/blocks-api` to `https://api.seliseblocks.com`. Fo
 the deployed SELISE container, `nginx.conf` does the same forwarding. If SELISE
 Cloud injects `VITE_API_BASE_URL=https://api.seliseblocks.com`, the frontend
 normalizes that back to `/blocks-api` in the browser before calling `fetch()`.
+The pnuasg browser project key is also present as a build fallback so SELISE Cloud
+deployments do not silently build with `ProjectKey=` empty when ignored local env
+files are unavailable. Override `VITE_X_BLOCKS_KEY` for any other SELISE project.
 
 Real `.env` files are intentionally ignored because they can contain project keys
 or admin tokens. Keep secrets in local `.env` files or SELISE build environment

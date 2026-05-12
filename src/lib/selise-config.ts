@@ -1,5 +1,6 @@
 const DEFAULT_SELISE_API_BASE_URL = '/blocks-api';
 const SELISE_API_ORIGIN = 'https://api.seliseblocks.com';
+const DEFAULT_SELISE_PROJECT_KEY = 'P8d53101e85884a6fbb63551ddc61c63f';
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
 
@@ -40,4 +41,12 @@ export const getSeliseDataGatewayUrl = (): string => {
   return resolveSameOriginProxyUrl(configuredUrl);
 };
 
-export const getSeliseProjectKey = (): string => import.meta.env.VITE_X_BLOCKS_KEY || '';
+export const getSeliseProjectKey = (): string => {
+  const configuredKey = import.meta.env.VITE_X_BLOCKS_KEY;
+
+  if (configuredKey && configuredKey !== '<X_BLOCKS_KEY>') {
+    return configuredKey;
+  }
+
+  return DEFAULT_SELISE_PROJECT_KEY;
+};

@@ -1,5 +1,8 @@
 const JSON_CONTENT_TYPE = 'application/json';
 
+const isJsonContentType = (contentType: string) =>
+  contentType.includes(JSON_CONTENT_TYPE) || contentType.includes('+json');
+
 const getBodyPreview = (body: string) =>
   body
     .replace(/\s+/g, ' ')
@@ -27,7 +30,7 @@ export const readJsonResponse = async <T = unknown>(
     return {} as T;
   }
 
-  if (!contentType.includes(JSON_CONTENT_TYPE)) {
+  if (!isJsonContentType(contentType)) {
     const bodyType = isHtmlBody(body) ? 'HTML' : contentType || 'non-JSON';
     throw new Error(
       `${context} returned ${bodyType} instead of JSON (${response.status} ${response.statusText}). ` +
