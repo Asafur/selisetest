@@ -19,11 +19,27 @@ const isBrowser = () => typeof window !== 'undefined' && typeof window.sessionSt
 
 const normalizeProvider = (provider?: string | null) => provider?.trim().toLowerCase() ?? '';
 
+const GOOGLE_SIGNIN_SCOPES = ['openid', 'email', 'profile'];
+
+const ensureGoogleSigninScopes = (scope: string | null): string => {
+  const scopes = new Set(
+    (scope ?? '')
+      .split(/\s+/)
+      .map((value) => value.trim())
+      .filter(Boolean)
+  );
+
+  GOOGLE_SIGNIN_SCOPES.forEach((value) => scopes.add(value));
+
+  return Array.from(scopes).join(' ');
+};
+
 export const getSsoProviderRedirectUrl = (provider: string, providerUrl: string): string => {
   const finalUrl = new URL(providerUrl);
 
   if (normalizeProvider(provider) === 'google') {
     finalUrl.searchParams.delete('approval_prompt');
+    finalUrl.searchParams.set('scope', ensureGoogleSigninScopes(finalUrl.searchParams.get('scope')));
     finalUrl.searchParams.set('prompt', 'select_account');
   }
 

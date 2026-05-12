@@ -1,6 +1,14 @@
 # TODO
 
-Last updated: 2026-05-05
+Last updated: 2026-05-12
+
+## 2026-05-12 Google SSO Account-Specific Update
+
+- Live production `GetLoginOptions` now returns Google with `social` enabled and audience `https://pnuasg-dzdlq.seliseblocks.com`.
+- Live production signup settings now return `isEmailPasswordSignUpEnabled: true` and `isSSoSignUpEnabled: true`.
+- The remaining `asafur.rahman@northsouth.edu` difference is account-specific: it is a Google Workspace account, while other accounts can complete the same SELISE Google flow.
+- SELISE generates Google authorization URLs with legacy `userinfo.email` and `userinfo.profile` scopes. The client now preserves SELISE state/callback values and adds standard OIDC sign-in scopes `openid email profile` before redirecting to Google.
+- If the NSU account still fails after this deploy, check SELISE IAM user/role state and the North South University Google Workspace third-party app access policy for this OAuth client.
 
 ## 2026-05-05 Current Integration Update
 
@@ -35,7 +43,7 @@ Last updated: 2026-05-05
   - Callback route exists at `/sso/:provider/callback`.
 - Live SELISE login-options probe confirmed social login is allowed but no SSO provider is configured yet.
 - Later live SELISE checks confirmed Google provider now appears in `GetLoginOptions`.
-- Live signup settings check confirmed both `isEmailPasswordSignUpEnabled` and `isSSoSignUpEnabled` are currently `false`.
+- Live signup settings initially showed signup disabled; current production checks on 2026-05-12 show both email/password signup and SSO signup enabled.
 - Frontend fallback text added so missing UILM key `NO_SUCH_EMAIL_MESSAGE` no longer appears raw if localization has not been configured yet.
 - VibeBuilder protected admin routes added under `/admin/sites`.
 - VibeBuilder public renderer routes added under `/vibe/:siteSlug` and `/vibe/:siteSlug/:pageSlug`.
@@ -79,7 +87,7 @@ Last updated: 2026-05-05
 ## In Progress
 
 - Waiting for authenticated browser verification of real CRUD through the existing `VibeProject`, `VibePage`, and `VibeFormSubmission` schemas.
-- Waiting for manual SELISE Identity signup/user configuration before Google SSO can complete for new Google accounts.
+- Waiting for deployment/browser verification that the account-specific Google Workspace SSO patch fixes `asafur.rahman@northsouth.edu`.
 - Waiting for a current SELISE admin access token before assigning `asafur.rahman@northsouth.edu` to the Admin role.
 - Current profile evidence shows `asafur.rahman@northsouth.edu` has role `USER`; role elevation still requires a SELISE admin token or manual Access Manager update.
 
@@ -122,7 +130,7 @@ Last updated: 2026-05-05
 
 - Public live read access for published pages, if unauthenticated public rendering is expected.
 - True role/collaborator enforcement beyond owner filtering.
-- Functional Google SSO login completion for new Google accounts.
+- Functional Google SSO login completion for the North South University Google Workspace account.
 
 ## Current Blocker Evidence
 
@@ -152,13 +160,13 @@ hasGoogle: false
 
 Earlier no Google provider/audience was returned, so the login screen correctly hid the Google button. Later the provider appeared after dashboard setup.
 
-## Google SSO Signup/User Blocker Evidence
+## Google SSO Signup/User Evidence
 
-The current project signup settings returned:
+Earlier project signup settings returned:
 
 ```text
 isEmailPasswordSignUpEnabled: false
 isSSoSignUpEnabled: false
 ```
 
-This means a Google account that is not already a SELISE user will hit the no-such-email path. To make that account work, either invite/create the user in IAM or enable SSO signup in SELISE Identity/Access settings.
+That old blocker is no longer current. Rechecking production on 2026-05-12 returned both signup flags as `true`, so a generic "new Google account cannot sign up" explanation no longer matches the latest behavior. If only `asafur.rahman@northsouth.edu` fails while other Google accounts work, treat the difference as account-specific Google Workspace policy and/or SELISE IAM user/role state.
