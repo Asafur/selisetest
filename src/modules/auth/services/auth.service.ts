@@ -1,6 +1,7 @@
 import { clients, HttpError } from '@/lib/https';
 import { useAuthStore } from '@/state/store/auth';
 import { getSeliseApiBaseUrl, getSeliseProjectKey } from '@/lib/selise-config';
+import { readErrorPayload, readJsonResponse } from '@/lib/http-response';
 import {
   AccountActivationPayload,
   ForgotPasswordPayload,
@@ -163,11 +164,11 @@ export const signin = async <
     });
 
     if (!response.ok) {
-      const err = await response.json();
+      const err = await readErrorPayload(response, `POST ${url}`);
       throw new HttpError(response.status, err);
     }
 
-    return response.json();
+    return readJsonResponse(response, `POST ${url}`);
   } else if (payload.grantType === 'social') {
     const signinBySSOData = new URLSearchParams();
     signinBySSOData.append('grant_type', 'social');
@@ -191,11 +192,11 @@ export const signin = async <
     });
 
     if (!response.ok) {
-      const err = await response.json();
+      const err = await readErrorPayload(response, `POST ${url}`);
       throw new HttpError(response.status, err);
     }
 
-    return response.json();
+    return readJsonResponse(response, `POST ${url}`);
   } else if (payload.grantType === 'authorization_code') {
     const signinBySSOData = new URLSearchParams();
     signinBySSOData.append('grant_type', 'authorization_code');
@@ -214,11 +215,11 @@ export const signin = async <
       credentials: 'include',
     });
     if (!response.ok) {
-      const err = await response.json();
+      const err = await readErrorPayload(response, `POST ${url}`);
       throw new HttpError(response.status, err);
     }
 
-    return response.json();
+    return readJsonResponse(response, `POST ${url}`);
   } else if (payload.grantType === 'sso_consent') {
     const ssoConsentData = new URLSearchParams();
     ssoConsentData.append('grant_type', 'sso_consent');
@@ -237,11 +238,11 @@ export const signin = async <
       credentials: 'include',
     });
     if (!response.ok) {
-      const err = await response.json();
+      const err = await readErrorPayload(response, `POST ${url}`);
       throw new HttpError(response.status, err);
     }
 
-    return response.json();
+    return readJsonResponse(response, `POST ${url}`);
   } else {
     // MFA OTP Verification flow
     const mfaFormData = new URLSearchParams();
@@ -261,11 +262,11 @@ export const signin = async <
     });
 
     if (!response.ok) {
-      const err = await response.json();
+      const err = await readErrorPayload(response, `POST ${url}`);
       throw new HttpError(response.status, err);
     }
 
-    return response.json();
+    return readJsonResponse(response, `POST ${url}`);
   }
 };
 
@@ -302,11 +303,11 @@ export const getRefreshToken = async () => {
   });
 
   if (!response.ok) {
-    const err = await response.json();
+    const err = await readErrorPayload(response, `POST ${apiBaseUrl}${url}`);
     throw new HttpError(response.status, err);
   }
 
-  return response.json();
+  return readJsonResponse(response, `POST ${apiBaseUrl}${url}`);
 };
 
 export const validateActivationCode = async (payload: {
@@ -396,11 +397,11 @@ export const switchOrganization = async (orgId: string): Promise<MFASigninRespon
   });
 
   if (!response.ok) {
-    const err = await response.json();
+    const err = await readErrorPayload(response, `POST ${url}`);
     throw new HttpError(response.status, err);
   }
 
-  return response.json();
+  return readJsonResponse(response, `POST ${url}`);
 };
 
 export const signupByEmail = (payload: ISignupByEmailPayload): Promise<ISignupByEmailResponse> => {

@@ -2,6 +2,7 @@ import { useAuthStore } from '@/state/store/auth';
 import { getRefreshToken } from '@/modules/auth/services/auth.service';
 import { isLocalhost } from './utils/localhost-checker/locahost-checker';
 import { getSeliseApiBaseUrl, getSeliseProjectKey } from './selise-config';
+import { readErrorPayload, readJsonResponse } from './http-response';
 
 /**
  * HTTP Client Module
@@ -131,17 +132,12 @@ export const clients: Https = {
       const response = await fetch(fullUrl, config);
 
       if (response.ok) {
-        return response.json() as Promise<T>;
+        return readJsonResponse<T>(response, `${method} ${fullUrl}`);
       }
 
       if (response.status === 401) {
         // Parse error response first to check if it's a login error
-        let err;
-        try {
-          err = await response.json();
-        } catch {
-          err = { error: response.statusText || 'Unauthorized' };
-        }
+        const err = await readErrorPayload(response, `${method} ${fullUrl}`);
 
         // If error has error_description, it's likely a login error, throw it directly
         if (err.error_description) {
@@ -152,18 +148,15 @@ export const clients: Https = {
         return this.handleAuthError<T>(url, method, headers, body);
       }
 
-      let err;
-      try {
-        err = await response.json();
-      } catch {
-        err = { error: response.statusText || 'Request failed' };
-      }
+      const err = await readErrorPayload(response, `${method} ${fullUrl}`);
       throw new HttpError(response.status, err);
     } catch (error) {
       if (error instanceof HttpError) {
         throw error;
       }
-      throw new HttpError(500, { error: 'Network error' });
+      throw new HttpError(500, {
+        error: error instanceof Error ? error.message : 'Network error',
+      });
     }
   },
 

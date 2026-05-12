@@ -1,39 +1,10 @@
 import { LoginOption } from '@/constant/sso';
 import { MFASigninResponse } from './auth.service';
 import { getSeliseApiBaseUrl, getSeliseProjectKey } from '@/lib/selise-config';
+import { readErrorPayload, readJsonResponse } from '@/lib/http-response';
 
 const projectKey = getSeliseProjectKey();
 const baseUrl = getSeliseApiBaseUrl();
-
-const safeJsonParse = async (response: Response) => {
-  try {
-    if (!response?.text) {
-      console.error('Invalid response object');
-      return { error: 'Invalid response object' };
-    }
-
-    const text = await response.text();
-
-    if (!text || text.trim() === '') {
-      console.error('Empty response received');
-      return { error: 'Empty response received' };
-    }
-
-    try {
-      return JSON.parse(text);
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      console.error('Failed to parse JSON response:', text);
-      return {
-        error: 'Invalid JSON response',
-        rawResponse: text,
-      };
-    }
-  } catch (error) {
-    console.error('Response handling error:', error);
-    return { error: 'Failed to process response' };
-  }
-};
 
 export interface SSOLoginResponse {
   providerUrl?: string;
@@ -62,20 +33,23 @@ export class SSOservice {
       });
 
       if (!rawResponse.ok) {
-        const errorText = await rawResponse.text();
+        const errorPayload = await readErrorPayload(rawResponse, `POST ${url}`);
         console.error('[SSO] API error response:', {
           status: rawResponse.status,
           statusText: rawResponse.statusText,
-          error: errorText,
+          error: errorPayload,
         });
 
         return {
-          error: `API error: ${rawResponse.status} - ${rawResponse.statusText}`,
+          error:
+            typeof errorPayload.error === 'string'
+              ? errorPayload.error
+              : `API error: ${rawResponse.status} - ${rawResponse.statusText}`,
           status: rawResponse.status,
         };
       }
 
-      const responseData = await safeJsonParse(rawResponse);
+      const responseData = await readJsonResponse<SSOLoginResponse>(rawResponse, `POST ${url}`);
 
       return responseData;
     } catch (error) {
@@ -102,16 +76,20 @@ export class SSOservice {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
+        const errorPayload = await readErrorPayload(response, `POST ${url}`);
         console.error('[SSO] MFA verification failed:', {
           status: response.status,
           statusText: response.statusText,
-          error: errorText,
+          error: errorPayload,
         });
-        throw new Error(errorText || 'Failed to verify MFA code');
+        throw new Error(
+          typeof errorPayload.error === 'string'
+            ? errorPayload.error
+            : 'Failed to verify MFA code'
+        );
       }
 
-      const responseData = await response.json();
+      const responseData = await readJsonResponse<MFASigninResponse>(response, `POST ${url}`);
 
       return responseData;
     } catch (error) {
@@ -139,20 +117,7 @@ export const getLoginOption = async (): Promise<LoginOption | null> => {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const contentType = response.headers.get('content-type') || '';
-    const responseText = await response.text();
-
-    if (!contentType.includes('application/json')) {
-      const trimmedResponse = responseText.trim().toLowerCase();
-      const returnedHtml = trimmedResponse.startsWith('<!doctype') || trimmedResponse.startsWith('<html');
-      throw new Error(
-        returnedHtml
-          ? `SELISE login options returned HTML instead of JSON. Check VITE_API_BASE_URL; current value resolves to ${baseUrl}.`
-          : `SELISE login options returned ${contentType || 'an unknown content type'} instead of JSON.`
-      );
-    }
-
-    return JSON.parse(responseText);
+    return await readJsonResponse<LoginOption>(response, `GET ${url}`);
   } catch (error) {
     console.error('[SSO] Error fetching login options:', error);
     throw error;
