@@ -115,6 +115,7 @@ export interface SigninByBlocksOidcPayload {
 
 const projectKey = getSeliseProjectKey();
 const apiBaseUrl = getSeliseApiBaseUrl();
+const SELISE_IDENTITY_TOKEN_URL = 'https://api.seliseblocks.com/idp/v1/Authentication/Token';
 
 const getApiUrl = (path: string) => {
   const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
@@ -139,7 +140,10 @@ export const signin = async <
 ): Promise<
   T extends 'password' | 'social' | 'sso_consent' ? SignInResponse : MFASigninResponse
 > => {
-  const url = getApiUrl('/idp/v1/Authentication/Token');
+  const url =
+    payload.grantType === 'social'
+      ? SELISE_IDENTITY_TOKEN_URL
+      : getApiUrl('/idp/v1/Authentication/Token');
 
   // sign in flow
   if (payload.grantType === 'password') {
