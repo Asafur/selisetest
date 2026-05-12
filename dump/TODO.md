@@ -8,6 +8,7 @@ Last updated: 2026-05-12
 - Live production signup settings now return `isEmailPasswordSignUpEnabled: true` and `isSSoSignUpEnabled: true`.
 - The remaining `asafur.rahman@northsouth.edu` difference is account-specific: it is a Google Workspace account, while other accounts can complete the same SELISE Google flow.
 - SELISE generates Google authorization URLs with legacy `userinfo.email` and `userinfo.profile` scopes. The client now preserves SELISE state/callback values and adds standard OIDC sign-in scopes `openid email profile` before redirecting to Google.
+- Google SSO token exchange no longer sends a cached `selected-org-id` as `org_id`; that stale org/admin context could make one Google account fail differently before SELISE has issued a token.
 - If the NSU account still fails after this deploy, check SELISE IAM user/role state and the North South University Google Workspace third-party app access policy for this OAuth client.
 
 ## 2026-05-05 Current Integration Update

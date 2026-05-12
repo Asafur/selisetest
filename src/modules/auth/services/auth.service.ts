@@ -125,8 +125,16 @@ const getApiUrl = (path: string) => {
   return `${baseUrl}${cleanPath}`;
 };
 
-export const savedOrgId =
+const getSavedOrgId = () =>
   typeof window !== 'undefined' ? window.localStorage.getItem('selected-org-id') : null;
+
+const appendSavedOrgId = (body: URLSearchParams) => {
+  const savedOrgId = getSavedOrgId();
+
+  if (savedOrgId) {
+    body.append('org_id', savedOrgId);
+  }
+};
 
 export const signin = async <
   T extends 'password' | 'social' | 'mfa_code' | 'authorization_code' | 'sso_consent' = 'password',
@@ -153,9 +161,7 @@ export const signin = async <
       passwordFormData.append('username', payload.username);
       passwordFormData.append('password', payload.password);
 
-      if (savedOrgId) {
-        passwordFormData.append('org_id', savedOrgId);
-      }
+      appendSavedOrgId(passwordFormData);
     }
     const response = await fetch(url, {
       method: 'POST',
@@ -178,10 +184,7 @@ export const signin = async <
     signinBySSOData.append('grant_type', 'social');
     signinBySSOData.append('code', payload.code);
     signinBySSOData.append('state', payload.state);
-
-    if (savedOrgId) {
-      signinBySSOData.append('org_id', savedOrgId);
-    }
+    // Do not force a cached org/admin context before SELISE has issued a token for this Google account.
 
     const response = await fetch(url, {
       method: 'POST',
@@ -206,9 +209,7 @@ export const signin = async <
     signinBySSOData.append('grant_type', 'authorization_code');
     signinBySSOData.append('code', payload.code);
 
-    if (savedOrgId) {
-      signinBySSOData.append('org_id', savedOrgId);
-    }
+    appendSavedOrgId(signinBySSOData);
     const response = await fetch(url, {
       method: 'POST',
       body: signinBySSOData,
@@ -229,9 +230,7 @@ export const signin = async <
     ssoConsentData.append('grant_type', 'sso_consent');
     ssoConsentData.append('code', payload.code);
 
-    if (savedOrgId) {
-      ssoConsentData.append('org_id', savedOrgId);
-    }
+    appendSavedOrgId(ssoConsentData);
     const response = await fetch(url, {
       method: 'POST',
       body: ssoConsentData,
@@ -373,9 +372,7 @@ export const signinByEmail = (payload: SigninEmailPayload): Promise<SigninEmailR
     body.append('captcha_code', payload.captchaCode);
   }
 
-  if (savedOrgId) {
-    body.append('org_id', savedOrgId);
-  }
+  appendSavedOrgId(body);
 
   const url = '/idp/v1/Authentication/Token';
   return clients.post(url, body, {
