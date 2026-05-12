@@ -7,6 +7,32 @@ SELISE `<blocks/>` Construct is a fully functional application blueprint designe
 - **SELISE `<blocks />` Construct** → [construct.seliseblocks.com](https://construct.seliseblocks.com)
 - **SELISE `<blocks />` Cloud** → [cloud.seliseblocks.com](https://cloud.seliseblocks.com)
 
+## Environment and SELISE API Proxy
+
+This app expects the browser to call SELISE APIs through the same-origin proxy path
+`/blocks-api`, not directly through `https://api.seliseblocks.com`. This avoids the
+Google SSO callback CORS failure on `/idp/v1/Authentication/Token`.
+
+Required local or SELISE build environment values:
+
+```sh
+VITE_X_BLOCKS_KEY=<your-selise-project-key>
+VITE_API_BASE_URL=/blocks-api
+VITE_BLOCKS_API_URL=/blocks-api
+VITE_DATA_GATEWAY_URL=/blocks-api/uds/v1/gateway
+VITE_PROJECT_SLUG=pnuasg
+VITE_SELISE_APP_DOMAIN=https://pnuasg-dzdlq.seliseblocks.com
+```
+
+For local dev, Vite forwards `/blocks-api` to `https://api.seliseblocks.com`. For
+the deployed SELISE container, `nginx.conf` does the same forwarding. If SELISE
+Cloud injects `VITE_API_BASE_URL=https://api.seliseblocks.com`, the frontend
+normalizes that back to `/blocks-api` in the browser before calling `fetch()`.
+
+Real `.env` files are intentionally ignored because they can contain project keys
+or admin tokens. Keep secrets in local `.env` files or SELISE build environment
+variables; `.env.example` is the committed reference for what to configure.
+
 ## Other Links
 
 ### Frontend
