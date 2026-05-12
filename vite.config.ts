@@ -9,18 +9,29 @@ import path from 'path';
 // This is expected during the migration period from CRA to Vite.
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const configuredBlocksApiUrl =
+    env.VITE_BLOCKS_UPSTREAM_API_URL ||
+    env.BLOCKS_UPSTREAM_API_URL ||
+    env.VITE_BLOCKS_API_URL ||
+    env.VITE_API_BASE_URL ||
+    'https://api.seliseblocks.com';
+  const blocksApiUrl = configuredBlocksApiUrl.startsWith('/')
+    ? 'https://api.seliseblocks.com'
+    : configuredBlocksApiUrl;
   const projectKey =
     env.VITE_X_BLOCKS_KEY ||
     env.X_BLOCKS_KEY ||
     env.SELISE_X_BLOCKS_KEY ||
-    'P8d53101e85884a6fbb63551ddc61c63f';
+    '';
 
   return {
     plugins: [react()],
 
-    define: {
-      'import.meta.env.VITE_X_BLOCKS_KEY': JSON.stringify(projectKey),
-    },
+    define: projectKey
+      ? {
+          'import.meta.env.VITE_X_BLOCKS_KEY': JSON.stringify(projectKey),
+        }
+      : {},
 
     // Path aliases to match tsconfig paths
     resolve: {
@@ -34,6 +45,15 @@ export default defineConfig(({ mode }) => {
       host: true,
       open: false,
       allowedHosts: true, // ✅ works for all tenants/domains
+      proxy: {
+        '/blocks-api': {
+          target: blocksApiUrl,
+          changeOrigin: true,
+          secure: true,
+          cookieDomainRewrite: '',
+          rewrite: (requestPath) => requestPath.replace(/^\/blocks-api/, ''),
+        },
+      },
     },
 
     // Build configuration

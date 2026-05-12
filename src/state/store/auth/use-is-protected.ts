@@ -21,13 +21,20 @@ const roleToString = (role: unknown): string => {
   if (!role || typeof role !== 'object') return '';
 
   const record = role as Record<string, unknown>;
+  const getCaseInsensitive = (key: string) => {
+    const matchedKey = Object.keys(record).find(
+      (candidate) => candidate.toLowerCase() === key.toLowerCase()
+    );
+    return matchedKey ? record[matchedKey] : undefined;
+  };
+
   return String(
-    record.slug ||
-      record.name ||
-      record.role ||
-      record.roleName ||
-      record.roleSlug ||
-      record.value ||
+    getCaseInsensitive('slug') ||
+      getCaseInsensitive('name') ||
+      getCaseInsensitive('role') ||
+      getCaseInsensitive('roleName') ||
+      getCaseInsensitive('roleSlug') ||
+      getCaseInsensitive('value') ||
       ''
   );
 };
@@ -60,11 +67,12 @@ const getCurrentOrgRoles = (
 
   const decoded = decodeJWT(accessToken);
   const currentOrgId = selectedOrgId ?? decoded?.org_id;
+  const allMembershipRoles = user.memberships.flatMap((membership: any) => membership.roles ?? []);
 
-  if (!currentOrgId) return rootRoles;
+  if (!currentOrgId) return [...rootRoles, ...allMembershipRoles];
 
   const membership = user.memberships.find((m: any) => m.organizationId === currentOrgId);
-  return membership?.roles ?? rootRoles;
+  return [...rootRoles, ...(membership?.roles ?? allMembershipRoles)];
 };
 
 const checkAllRoles = (userRoles: unknown[] | undefined, requiredRoles: string[]): boolean => {

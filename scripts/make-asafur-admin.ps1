@@ -111,6 +111,9 @@ if (!$apiBase) {
 if (!$apiBase) {
   $apiBase = "https://api.seliseblocks.com"
 }
+if ($apiBase.StartsWith("/")) {
+  $apiBase = "https://api.seliseblocks.com"
+}
 $apiBase = $apiBase.TrimEnd("/")
 
 $xBlocksKey = $env:VITE_X_BLOCKS_KEY

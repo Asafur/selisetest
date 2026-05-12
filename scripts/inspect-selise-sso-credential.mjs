@@ -1,11 +1,33 @@
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-const PROJECT_KEY = process.env.VITE_X_BLOCKS_KEY || 'P8d53101e85884a6fbb63551ddc61c63f';
-const API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://api.seliseblocks.com';
+const PROJECT_ROOT = path.resolve(import.meta.dirname, '..');
+
+function loadDotEnv(filePath) {
+  if (!existsSync(filePath)) return;
+
+  const lines = readFileSync(filePath, 'utf8').split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#') || !trimmed.includes('=')) continue;
+
+    const separatorIndex = trimmed.indexOf('=');
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const value = trimmed.slice(separatorIndex + 1).trim();
+    if (!process.env[key]) process.env[key] = value;
+  }
+}
+
+loadDotEnv(path.join(PROJECT_ROOT, '.env'));
+
+const PROJECT_KEY = process.env.VITE_X_BLOCKS_KEY || process.env.X_BLOCKS_KEY || process.env.SELISE_X_BLOCKS_KEY || '';
+const configuredApiBaseUrl = process.env.VITE_API_BASE_URL || 'https://api.seliseblocks.com';
+const API_BASE_URL = configuredApiBaseUrl.startsWith('/')
+  ? 'https://api.seliseblocks.com'
+  : configuredApiBaseUrl;
 const APP_DOMAIN = process.env.VITE_APP_DOMAIN || 'https://pnuasg-dzdlq.seliseblocks.com';
 const EXPECTED_GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID || '516004380369-fr52222st9s6ur0m5h1pk94dqt1amcr9.apps.googleusercontent.com';

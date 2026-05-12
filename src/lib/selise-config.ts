@@ -1,4 +1,4 @@
-const DEFAULT_SELISE_API_BASE_URL = 'https://api.seliseblocks.com';
+const DEFAULT_SELISE_API_BASE_URL = '/blocks-api';
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
 

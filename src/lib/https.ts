@@ -105,7 +105,11 @@ export const clients: Https = {
   },
 
   async request<T>(url: string, { method, headers = {}, body }: RequestOptions): Promise<T> {
-    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}/${url.replace(/^\//, '')}`;
+    const basePath = BASE_URL.startsWith('/') ? BASE_URL : '';
+    const isAlreadyBaseRelative = Boolean(basePath && url.startsWith(`${basePath}/`));
+    const fullUrl = url.startsWith('http') || isAlreadyBaseRelative
+      ? url
+      : `${BASE_URL}/${url.replace(/^\//, '')}`;
 
     const requestHeaders = this.createHeaders(headers);
 
