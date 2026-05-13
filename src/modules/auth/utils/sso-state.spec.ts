@@ -14,7 +14,8 @@ describe('getSsoProviderRedirectUrl', () => {
 
     expect(url.searchParams.get('state')).toBe('abc123');
     expect(url.searchParams.get('approval_prompt')).toBeNull();
-    expect(url.searchParams.get('prompt')).toBe('select_account');
+    expect(url.searchParams.get('prompt')).toBe('select_account consent');
+    expect(url.searchParams.get('include_granted_scopes')).toBe('false');
     expect(scopes).toEqual(
       expect.arrayContaining([
         'https://www.googleapis.com/auth/userinfo.email',

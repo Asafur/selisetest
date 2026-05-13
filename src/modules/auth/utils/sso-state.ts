@@ -40,7 +40,8 @@ export const getSsoProviderRedirectUrl = (provider: string, providerUrl: string)
   if (normalizeProvider(provider) === 'google') {
     finalUrl.searchParams.delete('approval_prompt');
     finalUrl.searchParams.set('scope', ensureGoogleSigninScopes(finalUrl.searchParams.get('scope')));
-    finalUrl.searchParams.set('prompt', 'select_account');
+    finalUrl.searchParams.set('prompt', 'select_account consent');
+    finalUrl.searchParams.set('include_granted_scopes', 'false');
   }
 
   return finalUrl.toString();
@@ -67,6 +68,7 @@ export const rememberSsoLoginState = (
     if (options.resetRecovery ?? true) {
       clearSsoStateRecovery();
     }
+    clearSsoCallbackExchange();
 
     const finalUrl = new URL(providerUrl);
     const state = finalUrl.searchParams.get('state');
