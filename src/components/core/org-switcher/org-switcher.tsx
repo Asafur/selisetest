@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { Building2, Check, ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,7 +25,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui-kit/tooltip';
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 export const OrgSwitcher = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

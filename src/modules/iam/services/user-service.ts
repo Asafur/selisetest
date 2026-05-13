@@ -1,4 +1,5 @@
 import { clients } from '@/lib/https';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { GetUsersPayload, IamData } from '../types/user.types';
 
 export const getUsers = (payload: GetUsersPayload) => {
@@ -45,7 +46,7 @@ export interface GetRolesPayload {
   projectKey?: string;
 }
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 /**
  * Function to fetch a list of roles from the API with pagination, sorting, and filtering.

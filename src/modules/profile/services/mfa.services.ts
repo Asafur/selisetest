@@ -1,4 +1,5 @@
 import { clients } from '@/lib/https';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import {
   DisableUserMfaRequest,
   DisableUserMfaResponse,
@@ -27,7 +28,7 @@ import {
  * const otpResponse = await generateOTP({ userId: '12345', mfaType: 1 });
  */
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 export const generateOTP = async (payload: GenerateOTPPayload): Promise<GenerateOTPResponse> => {
   const requestPayload = {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { useTranslation } from 'react-i18next';
 import { Table } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
@@ -22,7 +23,7 @@ interface PaginationState {
   totalCount: number;
 }
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 /**
  * Table toolbar component for handling filters and search.

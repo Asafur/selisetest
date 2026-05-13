@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Check, ChevronLeft } from 'lucide-react';
@@ -47,7 +48,7 @@ interface StepperProps {
   onStepChange: (step: number) => void;
 }
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 export function Stepper({ steps, currentStep, onStepChange }: Readonly<StepperProps>) {
   return (

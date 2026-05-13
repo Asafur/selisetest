@@ -87,6 +87,9 @@ Last updated: 2026-05-13
 - Do not use the stale project-scoped Data Gateway URL; the working gateway is `/uds/v1/gateway`.
 - Do not force-render Google SSO without a configured SELISE Identity SSO credential. The login page must show only providers returned by SELISE `GetLoginOptions`.
 - Add a Windows `.bat` launcher for local use; the launcher opens `/vibe-builder` and the route correctly requires login.
+- Do not commit SELISE project keys as source-code fallbacks. Use ignored `.env*` files locally and Blocks Cloud build environment variables for deployment.
+- Keep Google SSO start and callback token exchange on the same same-origin `/blocks-api` path so SELISE's SSO state cookie is preserved through the browser and nginx proxy.
+- Treat `cloudadmin` as the SELISE-backed admin role alias for app admin-only navigation and IAM route protection. The first/only admin still depends on SELISE IAM role assignment, not client-side guessing.
 
 ## Tradeoffs
 

@@ -1,6 +1,7 @@
 const DEFAULT_SELISE_API_BASE_URL = '/blocks-api';
 const SELISE_API_ORIGIN = 'https://api.seliseblocks.com';
-const DEFAULT_SELISE_PROJECT_KEY = '';
+const LOCAL_STORAGE_PROJECT_KEY = 'projectKey';
+const PROJECT_KEY_PLACEHOLDERS = new Set(['', '<X_BLOCKS_KEY>', '<VITE_X_BLOCKS_KEY>']);
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
 
@@ -42,11 +43,22 @@ export const getSeliseDataGatewayUrl = (): string => {
 };
 
 export const getSeliseProjectKey = (): string => {
-  const configuredKey = import.meta.env.VITE_X_BLOCKS_KEY;
+  const configuredKey =
+    import.meta.env.VITE_X_BLOCKS_KEY ||
+    import.meta.env.VITE_SELISE_BLOCKS_KEY ||
+    import.meta.env.VITE_SELISE_PROJECT_KEY ||
+    '';
 
-  if (configuredKey && configuredKey !== '<X_BLOCKS_KEY>') {
+  if (!PROJECT_KEY_PLACEHOLDERS.has(configuredKey)) {
     return configuredKey;
   }
 
-  return DEFAULT_SELISE_PROJECT_KEY;
+  if (isBrowser()) {
+    const storedKey = window.localStorage.getItem(LOCAL_STORAGE_PROJECT_KEY) || '';
+    if (!PROJECT_KEY_PLACEHOLDERS.has(storedKey)) {
+      return storedKey;
+    }
+  }
+
+  return '';
 };

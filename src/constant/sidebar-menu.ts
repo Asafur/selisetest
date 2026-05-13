@@ -33,6 +33,7 @@ const createMenuItemWithChildren = (
 export const menuItems: MenuItem[] = [
   createMenuItem('iam', 'IAM', '/identity-management', 'Users', {
     isIntegrated: true,
+    roles: ['admin'],
   }),
   createMenuItem('inventory', 'INVENTORY', '/inventory', 'Store', { isIntegrated: true }),
   createMenuItem('invoices', 'INVOICES', '/invoices', 'ReceiptText', {

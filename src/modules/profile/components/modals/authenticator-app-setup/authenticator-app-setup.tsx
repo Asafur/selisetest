@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import {
@@ -36,7 +37,7 @@ interface AuthenticatorAppSetupProps {
   mfaId: string;
 }
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 export const AuthenticatorAppSetup = ({
   userInfo,

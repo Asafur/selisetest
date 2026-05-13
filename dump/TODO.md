@@ -122,6 +122,7 @@ Last updated: 2026-05-13
 ## Remaining Implementation Tasks
 
 - Verify VibeBuilder CRUD after logging in with a SELISE account that has access to the existing Vibe schemas.
+- Redeploy the current commit after configuring a non-secret build env variable for the SELISE project key; the production browser was still serving an older failed-deploy build when the Google SSO screenshots were captured.
 - Verify media upload against SELISE Storage/Media from the authenticated builder.
 - Verify contact form submissions after `VibeFormSubmission` has public-safe insert access if public forms are required.
 - Add collaborator management after `VibeUserRole` or equivalent IAM/Access Manager permissions are configured.
@@ -154,6 +155,7 @@ Last updated: 2026-05-13
 - Configure SELISE Storage/media service.
 - Confirm upload, list, delete, and URL access flow.
 - Configure Blocks Cloud deployment for `Asafur/selisetest`.
+- In Blocks Cloud deployment/build env, set `VITE_X_BLOCKS_KEY` or one supported alias such as `X_BLOCKS_KEY`, `SELISE_X_BLOCKS_KEY`, `VITE_SELISE_BLOCKS_KEY`, `SELISE_BLOCKS_KEY`, `VITE_SELISE_PROJECT_KEY`, `SELISE_PROJECT_KEY`, `PROJECT_KEY`, or `BLOCKS_KEY`.
 - Verify route fallback for public page routes.
 
 ## Blocked Until Confirmed
@@ -161,6 +163,7 @@ Last updated: 2026-05-13
 - Public live read access for published pages, if unauthenticated public rendering is expected.
 - True role/collaborator enforcement beyond owner filtering.
 - Functional Google SSO login completion for the North South University Google Workspace account.
+- Confirm the new same-origin SSO proxy/cookie fix in production after redeploy.
 
 ## Current Blocker Evidence
 
@@ -200,3 +203,12 @@ isSSoSignUpEnabled: false
 ```
 
 That old blocker is no longer current. Rechecking production on 2026-05-12 returned both signup flags as `true`, so a generic "new Google account cannot sign up" explanation no longer matches the latest behavior. If only `asafur.rahman@northsouth.edu` fails while other Google accounts work, treat the difference as account-specific Google Workspace policy and/or SELISE IAM user/role state.
+
+## 2026-05-13 Bug Hunt Notes
+
+- Fixed split project-key reads. Older modules read `import.meta.env.VITE_X_BLOCKS_KEY` directly and could send `ProjectKey=` even while newer services worked. They now use the shared SELISE config helper.
+- Removed tracked hardcoded project-key fallback from source/config. Real keys must stay in ignored `.env*` files or Blocks Cloud build env variables.
+- Fixed Google SSO state handling so the social token exchange uses the same `/blocks-api` proxy path as SSO start, and nginx no longer strips the state cookie on `/idp/v1/Authentication/Token`.
+- Cleared stale SSO callback exchange locks whenever a fresh provider redirect is created.
+- Fixed admin-only menu/route enforcement for IAM/user management. The UI now treats SELISE `cloudadmin` as an admin alias and hides/protects admin-only entries for normal users.
+- Local verification passed: production build, full Vitest suite, ESLint, and Playwright login-page smoke.

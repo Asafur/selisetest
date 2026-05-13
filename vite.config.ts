@@ -3,8 +3,6 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-const DEFAULT_SELISE_PROJECT_KEY = '';
-
 // https://vitejs.dev/config/
 // Note: CJS deprecation warning is informational and doesn't affect functionality.
 // It occurs when dependencies use the legacy CommonJS Vite API instead of ES modules.
@@ -24,7 +22,13 @@ export default defineConfig(({ mode }) => {
     env.VITE_X_BLOCKS_KEY ||
     env.X_BLOCKS_KEY ||
     env.SELISE_X_BLOCKS_KEY ||
-    DEFAULT_SELISE_PROJECT_KEY;
+    env.VITE_SELISE_BLOCKS_KEY ||
+    env.SELISE_BLOCKS_KEY ||
+    env.VITE_SELISE_PROJECT_KEY ||
+    env.SELISE_PROJECT_KEY ||
+    env.PROJECT_KEY ||
+    env.BLOCKS_KEY ||
+    '';
 
   return {
     plugins: [react()],

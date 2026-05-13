@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { useTranslation } from 'react-i18next';
 import { useDropzone } from 'react-dropzone';
 import { TaskAttachments, FileType } from '../../types/task-manager.types';
@@ -81,7 +82,7 @@ const getCurrentUser = () => {
   return profile ? JSON.parse(profile) : null;
 };
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 export function AttachmentsSection({
   taskId,

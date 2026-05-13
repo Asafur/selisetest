@@ -39,6 +39,7 @@ describe('signin social exchange', () => {
     const requestInit = fetchMock.mock.calls[0]?.[1] as RequestInit;
     const body = requestInit.body as URLSearchParams;
 
+    expect(fetchMock.mock.calls[0]?.[0]).toBe('/blocks-api/idp/v1/Authentication/Token');
     expect(body.get('grant_type')).toBe('social');
     expect(body.get('code')).toBe('google-code');
     expect(body.get('state')).toBe('selise-state');

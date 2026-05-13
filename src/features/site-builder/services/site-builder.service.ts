@@ -1,4 +1,5 @@
 import { graphqlClient } from '@/lib/graphql-client';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { getPreSignedUrlForUpload } from '@/lib/api/services/storage.service';
 import { ModuleName } from '@/constant/modules.constants';
 import {
@@ -331,7 +332,7 @@ const uploadMediaFile = async (params: {
   workspaceId?: string;
   file: File;
 }) => {
-  const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+  const projectKey = getSeliseProjectKey();
   if (!projectKey) {
     throw new Error('Missing VITE_X_BLOCKS_KEY. Configure SELISE project key in a local .env file.');
   }

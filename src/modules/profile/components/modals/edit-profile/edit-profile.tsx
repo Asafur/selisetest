@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useDropzone } from 'react-dropzone';
@@ -65,7 +66,7 @@ type EditProfileProps = {
   onClose: () => void;
 };
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 export function EditProfile({ userInfo, onClose }: Readonly<EditProfileProps>) {
   const [previewImage, setPreviewImage] = useState<string>(DummyProfile);

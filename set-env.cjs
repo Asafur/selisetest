@@ -29,26 +29,19 @@ const projectSlug = pick('VITE_PROJECT_SLUG', 'PROJECT_SLUG') || 'pnuasg';
 const appDomain =
   pick('VITE_SELISE_APP_DOMAIN', 'SELISE_APP_DOMAIN', 'APP_DOMAIN') ||
   'https://pnuasg-dzdlq.seliseblocks.com';
-const getPublicProjectKeyFallback = () => {
-  if (process.env.DISABLE_PUBLIC_PROJECT_KEY_FALLBACK === 'true') return '';
+const projectKey = pick(
+  'VITE_X_BLOCKS_KEY',
+  'X_BLOCKS_KEY',
+  'SELISE_X_BLOCKS_KEY',
+  'VITE_SELISE_BLOCKS_KEY',
+  'SELISE_BLOCKS_KEY',
+  'VITE_SELISE_PROJECT_KEY',
+  'SELISE_PROJECT_KEY',
+  'PROJECT_KEY',
+  'BLOCKS_KEY'
+);
 
-  // This is the browser project identifier for this SELISE environment, not a PAT or SSO secret.
-  return Buffer.from('UDhkNTMxMDFlODU4ODRhNmZiYjYzNTUxZGRjNjFjNjNm', 'base64').toString('utf8');
-};
-const projectKey =
-  pick(
-    'VITE_X_BLOCKS_KEY',
-    'X_BLOCKS_KEY',
-    'SELISE_X_BLOCKS_KEY',
-    'VITE_SELISE_BLOCKS_KEY',
-    'SELISE_BLOCKS_KEY',
-    'VITE_SELISE_PROJECT_KEY',
-    'SELISE_PROJECT_KEY',
-    'PROJECT_KEY',
-    'BLOCKS_KEY'
-  ) || getPublicProjectKeyFallback();
-
-if (!projectKey || projectKey === '<X_BLOCKS_KEY>') {
+if (!projectKey) {
   console.error(
     'Missing VITE_X_BLOCKS_KEY. Add the SELISE X-Blocks-Key as a build/deployment environment variable before deploying.'
   );

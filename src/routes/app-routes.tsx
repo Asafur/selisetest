@@ -116,7 +116,14 @@ export const AppRoutes = () => {
                 <Route path="/mail/:category" element={<EmailPage />} />
                 <Route path="/mail/:category/:emailId" element={<EmailPage />} />
                 <Route path="/mail/:category/:labels/:emailId" element={<EmailPage />} />
-                <Route path="/identity-management" element={<UsersTablePage />} />
+                <Route
+                  path="/identity-management"
+                  element={
+                    <ProtectedRoute roles={['admin']}>
+                      <UsersTablePage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="/task-manager" element={<TaskManagerPage />} />
                 <Route
                   path="/chat"

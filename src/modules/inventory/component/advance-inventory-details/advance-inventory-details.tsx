@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Pen, Plus, Search, Trash } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
@@ -52,7 +53,7 @@ import { ModuleName } from '@/constant/modules.constants';
  * <AdvanceInventoryDetails />
  */
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 export function AdvanceInventoryDetails() {
   const [selectedImage, setSelectedImage] = useState('');

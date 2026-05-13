@@ -1,10 +1,11 @@
 import { clients } from '@/lib/https';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { ChangePasswordPayload } from '../types/account.type';
 import { User } from '@/types/user.type';
 import { CreateUserFormType, ProfileFormType } from '../components/utils/index.utils';
 
 export const changePassword = async (payload: ChangePasswordPayload) => {
-  payload.projectKey = payload.projectKey ?? import.meta.env.VITE_X_BLOCKS_KEY;
+  payload.projectKey = payload.projectKey ?? getSeliseProjectKey();
   return clients.post('/idp/v1/Iam/ChangePassword', JSON.stringify(payload));
 };
 

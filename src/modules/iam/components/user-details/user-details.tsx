@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { useState } from 'react';
+import { getSeliseProjectKey } from '@/lib/selise-config';
 import { useTranslation } from 'react-i18next';
 import {
   Sheet,
@@ -50,7 +51,7 @@ interface UserDetailsSheetProps {
 
 type ModalType = 'resetPassword' | 'resendActivation' | 'edit' | null;
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
+const projectKey = getSeliseProjectKey();
 
 export const UserDetails = ({
   open,
