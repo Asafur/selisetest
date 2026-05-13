@@ -27,6 +27,8 @@ const SSO_NETWORK_FAILED_FALLBACK =
   'The browser could not reach SELISE Identity. Check your connection or browser shields, then start Google sign-in again.';
 const SSO_TOKEN_EXCHANGE_FAILED_FALLBACK =
   'SELISE Identity could not exchange this Google sign-in code. Check the Google Client Secret, Redirect URL, and Audience in SELISE Identity, then start Google sign-in again.';
+const SSO_GATEWAY_FAILED_FALLBACK =
+  'SELISE Identity returned a temporary gateway error while exchanging this Google sign-in code. Please wait a few seconds, refresh, and start Google sign-in again.';
 
 const stringifyError = (error: any): string =>
   `${error?.message || ''} ${JSON.stringify(error?.error || {})} ${JSON.stringify(
@@ -59,6 +61,14 @@ const isNoSuchEmailError = (errorPayloadStr: string): boolean =>
 
 const isNetworkFetchError = (errorPayloadStr: string): boolean =>
   errorPayloadStr.includes('failed to fetch') || errorPayloadStr.includes('networkerror');
+
+const isTransientGatewayError = (errorPayloadStr: string): boolean =>
+  errorPayloadStr.includes('502') ||
+  errorPayloadStr.includes('503') ||
+  errorPayloadStr.includes('504') ||
+  errorPayloadStr.includes('bad gateway') ||
+  errorPayloadStr.includes('gateway timeout') ||
+  errorPayloadStr.includes('returned html instead of json');
 
 function getSsoActivationPath(url: string, provider?: string): string | null {
   const queryPart = url.split('?')[1];
@@ -188,6 +198,15 @@ export function useSsoActivation(provider?: string, options: { enabled?: boolean
             ? noSuchEmailTemplate.replace('---', ` (${emailTarget})`)
             : noSuchEmailTemplate.replace('---', ``);
           navigate('/login', { replace: true, state: { ssoError: errorMsg } });
+        } else if (isTransientGatewayError(errorPayloadStr)) {
+          navigate('/login', {
+            replace: true,
+            state: {
+              ssoError: t('SSO_GATEWAY_FAILED', {
+                defaultValue: SSO_GATEWAY_FAILED_FALLBACK,
+              }),
+            },
+          });
         } else if (isNetworkFetchError(errorPayloadStr)) {
           navigate('/login', {
             replace: true,

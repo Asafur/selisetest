@@ -115,6 +115,7 @@ export interface SigninByBlocksOidcPayload {
 
 const projectKey = getSeliseProjectKey();
 const apiBaseUrl = getSeliseApiBaseUrl();
+const TRANSIENT_TOKEN_EXCHANGE_STATUSES = new Set([502, 503, 504]);
 
 const getApiUrl = (path: string) => {
   const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
@@ -133,6 +134,40 @@ const appendSavedOrgId = (body: URLSearchParams) => {
   if (savedOrgId) {
     body.append('org_id', savedOrgId);
   }
+};
+
+const wait = (durationMs: number) =>
+  new Promise((resolve) => {
+    window.setTimeout(resolve, durationMs);
+  });
+
+const fetchTokenWithTransientRetry = async (
+  url: string,
+  init: RequestInit,
+  maxAttempts = 2
+): Promise<Response> => {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch(url, init);
+      const shouldRetry =
+        TRANSIENT_TOKEN_EXCHANGE_STATUSES.has(response.status) && attempt < maxAttempts;
+
+      if (!shouldRetry) {
+        return response;
+      }
+    } catch (error) {
+      lastError = error;
+      if (attempt >= maxAttempts) {
+        throw error;
+      }
+    }
+
+    await wait(500 * attempt);
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Token exchange request failed');
 };
 
 export const signin = async <
@@ -182,7 +217,7 @@ export const signin = async <
     signinBySSOData.append('state', payload.state);
     // Do not force a cached org/admin context before SELISE has issued a token for this Google account.
 
-    const response = await fetch(url, {
+    const response = await fetchTokenWithTransientRetry(url, {
       method: 'POST',
       body: signinBySSOData,
       headers: {
