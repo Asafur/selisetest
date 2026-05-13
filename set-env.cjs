@@ -30,7 +30,24 @@ const appDomain =
   pick('VITE_SELISE_APP_DOMAIN', 'SELISE_APP_DOMAIN', 'APP_DOMAIN') ||
   'https://pnuasg-dzdlq.seliseblocks.com';
 const projectKey =
-  pick('VITE_X_BLOCKS_KEY', 'X_BLOCKS_KEY', 'SELISE_X_BLOCKS_KEY');
+  pick(
+    'VITE_X_BLOCKS_KEY',
+    'X_BLOCKS_KEY',
+    'SELISE_X_BLOCKS_KEY',
+    'VITE_SELISE_BLOCKS_KEY',
+    'SELISE_BLOCKS_KEY',
+    'VITE_SELISE_PROJECT_KEY',
+    'SELISE_PROJECT_KEY',
+    'PROJECT_KEY',
+    'BLOCKS_KEY'
+  );
+
+if (!projectKey || projectKey === '<X_BLOCKS_KEY>') {
+  console.error(
+    'Missing VITE_X_BLOCKS_KEY. Add the SELISE X-Blocks-Key as a build/deployment environment variable before deploying.'
+  );
+  process.exit(1);
+}
 
 const generatedValues = {
   VITE_BLOCKS_API_URL: pick('VITE_BLOCKS_API_URL', 'BLOCKS_API_URL', 'BLOCKS_API_BASE_URL') || apiBaseUrl,
