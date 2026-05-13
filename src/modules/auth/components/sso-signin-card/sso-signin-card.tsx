@@ -68,9 +68,15 @@ const SSOSigninCard = ({
         return;
       }
 
+      const isLocalDev =
+        window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const useLocalSsoCallback =
+        isLocalDev && import.meta.env.VITE_ENABLE_LOCAL_SSO_CALLBACK === 'true';
+      const localCallbackUrl = `${window.location.origin}/sso/${providerConfig.provider}/callback`;
       const requestPayload = {
         provider: providerConfig.provider,
-        audience: providerConfig.audience,
+        audience: useLocalSsoCallback ? window.location.origin : providerConfig.audience,
+        ...(useLocalSsoCallback ? { nextUrl: localCallbackUrl } : {}),
         sendAsResponse: true,
       };
 

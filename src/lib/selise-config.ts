@@ -1,6 +1,6 @@
 const DEFAULT_SELISE_API_BASE_URL = '/blocks-api';
 const SELISE_API_ORIGIN = 'https://api.seliseblocks.com';
-const DEFAULT_SELISE_PROJECT_KEY = 'P8d53101e85884a6fbb63551ddc61c63f';
+const DEFAULT_SELISE_PROJECT_KEY = '';
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
 

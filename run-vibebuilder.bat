@@ -6,7 +6,7 @@ title VibeBuilder - SELISE Blocks
 cd /d "%~dp0"
 
 set "APP_URL=http://localhost:3000/vibe-builder"
-set "ADMIN_SCRIPT=%~dp0scripts\make-asafur-admin.ps1"
+set "ADMIN_SCRIPT=%~dp0scripts\bootstrap-first-gmail-admin.ps1"
 set "ADMIN_BROWSER_SCRIPT=%~dp0scripts\capture-selise-admin-token.mjs"
 set "ADMIN_TOKEN_SCRIPT=%~dp0scripts\run-admin-with-token.ps1"
 
@@ -56,9 +56,9 @@ echo If you are not logged in, SELISE Construct will open login first and return
 echo.
 echo Maintenance:
 echo   run-vibebuilder.bat setup   installs dependencies, lints, and builds
-echo   run-vibebuilder.bat admin   assigns asafur.rahman@northsouth.edu to Admin when SELISE_ACCESS_TOKEN is set
-echo   run-vibebuilder.bat admin-token   prompts for a SELISE token/PAT and assigns Admin without saving it
-echo   run-vibebuilder.bat admin-browser   opens Edge, captures an admin token locally, and assigns Admin
+echo   run-vibebuilder.bat admin   makes the first signed-in Gmail account the only Admin when SELISE_ACCESS_TOKEN is set
+echo   run-vibebuilder.bat admin-token   prompts for a SELISE token/PAT and applies the first-Gmail admin policy
+echo   run-vibebuilder.bat admin-browser   opens Edge, captures an admin token locally, and applies the first-Gmail admin policy
 echo.
 
 start "VibeBuilder Dev Server" cmd /k "cd /d ""%~dp0"" && npm run dev"
@@ -148,7 +148,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%ADMIN_SCRIPT%"
 set "ADMIN_EXIT=%ERRORLEVEL%"
 echo.
 if not "%ADMIN_EXIT%"=="0" (
-  echo Admin assignment did not complete.
+  echo First-Gmail admin bootstrap did not complete.
   pause
   exit /b %ADMIN_EXIT%
 )

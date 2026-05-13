@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const PROJECT_ROOT = path.resolve(import.meta.dirname, '..');
-const TARGET_EMAIL = process.argv[2] || 'asafur.rahman@northsouth.edu';
+const TARGET_DOMAIN = process.argv[2] || '@gmail.com';
 const CLOUD_URL = 'https://cloud.seliseblocks.com';
 const MAX_WAIT_MS = 10 * 60 * 1000;
 
@@ -100,7 +100,7 @@ async function runAdminHelper(token, source) {
   if (finished || seenTokens.has(token)) return false;
   seenTokens.add(token);
 
-  console.log(`Found a bearer token from ${source}. Testing admin role assignment without printing the token...`);
+  console.log(`Found a bearer token from ${source}. Testing first-Gmail-only admin bootstrap without printing the token...`);
 
   const result = await new Promise((resolve) => {
     const child = spawn(
@@ -110,9 +110,9 @@ async function runAdminHelper(token, source) {
         '-ExecutionPolicy',
         'Bypass',
         '-File',
-        path.join(PROJECT_ROOT, 'scripts', 'make-asafur-admin.ps1'),
-        '-Email',
-        TARGET_EMAIL,
+        path.join(PROJECT_ROOT, 'scripts', 'bootstrap-first-gmail-admin.ps1'),
+        '-EmailDomain',
+        TARGET_DOMAIN,
       ],
       {
         cwd: PROJECT_ROOT,
@@ -135,7 +135,7 @@ async function runAdminHelper(token, source) {
 
   if (result.code === 0) {
     console.log(result.output.trim());
-    console.log('Admin assignment completed.');
+    console.log('First-Gmail admin bootstrap completed.');
     finished = true;
     return true;
   }

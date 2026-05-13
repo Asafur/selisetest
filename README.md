@@ -22,15 +22,24 @@ VITE_BLOCKS_API_URL=/blocks-api
 VITE_DATA_GATEWAY_URL=/blocks-api/uds/v1/gateway
 VITE_PROJECT_SLUG=pnuasg
 VITE_SELISE_APP_DOMAIN=https://pnuasg-dzdlq.seliseblocks.com
+VITE_ENABLE_LOCAL_SSO_CALLBACK=false
 ```
+
+`VITE_X_BLOCKS_KEY` is required. The build intentionally does not keep a
+project-key fallback in source code.
 
 For local dev, Vite forwards `/blocks-api` to `https://api.seliseblocks.com`. For
 the deployed SELISE container, `nginx.conf` does the same forwarding. If SELISE
 Cloud injects `VITE_API_BASE_URL=https://api.seliseblocks.com`, the frontend
 normalizes that back to `/blocks-api` in the browser before calling `fetch()`.
-The pnuasg browser project key is also present as a build fallback so SELISE Cloud
-deployments do not silently build with `ProjectKey=` empty when ignored local env
-files are unavailable. Override `VITE_X_BLOCKS_KEY` for any other SELISE project.
+No real project key is kept as a source-code fallback; SELISE Cloud deployments
+must provide `VITE_X_BLOCKS_KEY` through build environment values. Override it for
+any other SELISE project.
+
+For Google SSO, the current Blocks Cloud credential uses the production audience
+and callback URL. Keep `VITE_ENABLE_LOCAL_SSO_CALLBACK=false` unless SELISE
+Identity and the Google OAuth client are both configured with the exact local
+callback, such as `http://localhost:3000/sso/google/callback`.
 
 Real `.env` files are intentionally ignored because they can contain project keys
 or admin tokens. Keep secrets in local `.env` files or SELISE build environment

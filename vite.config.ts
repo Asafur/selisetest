@@ -3,7 +3,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-const DEFAULT_SELISE_PROJECT_KEY = 'P8d53101e85884a6fbb63551ddc61c63f';
+const DEFAULT_SELISE_PROJECT_KEY = '';
 
 // https://vitejs.dev/config/
 // Note: CJS deprecation warning is informational and doesn't affect functionality.

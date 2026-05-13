@@ -1,6 +1,18 @@
 # Decisions
 
-Last updated: 2026-05-05
+Last updated: 2026-05-13
+
+## 2026-05-12 Verification Decisions
+
+- The active working folder for this pass is `C:\Users\akkha\selisetest-local-run`; older path references to `selise-blocks-pnuasg\test` are historical.
+- Keep Table, Code / Embed, and Blog / Article out of the visible draggable component library. The final assignment is a site builder, not a blog CMS or arbitrary custom-code embed tool.
+- Retain legacy renderer tolerance for old saved layouts where practical, but do not present deferred block types as new MVP creation options.
+- Admin access is handled through SELISE IAM role assignment, not a hardcoded frontend bypass.
+- The current admin policy is: choose the earliest signed-in `@gmail.com` user as the only app admin, assign that account the Admin role, and strip admin-like roles from all other users while preserving non-admin roles.
+- Applying that policy still requires a current SELISE admin bearer access token because the browser app must not carry privileged IAM mutation credentials.
+- Keep the Google/social callback token exchange on the same configured API base as the login endpoint. In local dev that means `/blocks-api`, because switching only the callback to a direct `https://api.seliseblocks.com` fetch can lose the session cookie/state context.
+- The current Blocks Cloud Google credential is production-only, so local dev uses the configured production audience by default. Local callback testing is opt-in through `VITE_ENABLE_LOCAL_SSO_CALLBACK=true` and should be enabled only after SELISE Identity and Google OAuth allow the exact local callback.
+- Do not keep real SELISE keys as source-code fallbacks. Use ignored `.env` files locally and Blocks deployment env variables in production.
 
 ## 2026-05-05 Updated Decisions
 
@@ -17,13 +29,13 @@ Last updated: 2026-05-05
 - Apply the newer `vidzz` reference as a style direction only: dark studio surface, glass panels, neon teal/purple/coral accents, animated grid/light sweep, and lifted cards. Do not copy the video 1:1 and do not hardcode video-derived media as production assets.
 - Scope the visual treatment under VibeBuilder classes so Construct navigation, login, and unrelated modules remain intact.
 - `run-vibebuilder.bat` now has three modes: default dev launch, `setup` for install/lint/build, and `admin` for the SELISE IAM admin helper.
-- Admin assignment for `asafur.rahman@northsouth.edu` must use a current SELISE admin access token in `SELISE_ACCESS_TOKEN`. The helper must fetch current roles first because SELISE `SetRoles` replaces role assignments.
+- Admin assignment must use a current SELISE admin bearer access token in `SELISE_ACCESS_TOKEN`. The helper must fetch current roles first because SELISE `SetRoles` replaces role assignments.
 - The visible `/vibe-builder` workbench may be interactive but remains temporary; real persistence means creating a SELISE Data Gateway `VibeProject` and `VibePage` through `/vibe-builder/sites` or `/admin/sites`, then editing that page so autosave/publish writes to SELISE.
 - Canvas editing should support direct manipulation: double-click text in the canvas to edit it in place, and use the right sidebar for deeper settings. JSON remains available only as an advanced escape hatch.
 
 ## VibeBuilder Implementation Decisions
 
-- Continue in the existing Construct project at `C:\Users\akkha\selise-blocks-pnuasg\test`; no duplicate project was created.
+- Continue in the existing Construct project at `C:\Users\akkha\selisetest-local-run`; no duplicate project was created.
 - Use the existing React + Vite + TypeScript + Tailwind/shadcn-style Construct stack.
 - Use the existing Zustand auth store and SELISE `GetAccount` flow for current-user identity.
 - Add VibeBuilder under `src/features/site-builder` because that folder already existed as the intended feature boundary.

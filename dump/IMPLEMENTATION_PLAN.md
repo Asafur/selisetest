@@ -1,6 +1,17 @@
 # Implementation Plan
 
-Last updated: 2026-05-05
+Last updated: 2026-05-13
+
+## 2026-05-12 Current Pass
+
+- Active project inspected at `C:\Users\akkha\selisetest-local-run`.
+- Safe env-key inspection confirmed local `.env*` files exist; values were not printed.
+- `.gitignore` already covers local env files and raw dump files.
+- `npm run build` passed.
+- The draggable component library now exposes only assignment-aligned site-builder blocks, with deferred Table / Code Embed / Blog Article creation options removed.
+- Admin bootstrap scripts now enforce first-Gmail-only admin assignment through SELISE IAM when a current admin bearer access token is provided.
+- Google/social callback exchange now uses the configured auth base consistently; focused SSO tests, lint, and build pass.
+- Local Google sign-in defaults to the configured production audience because the current SELISE credential is production-only. Local callback testing is available behind `VITE_ENABLE_LOCAL_SSO_CALLBACK=true` after SELISE/Google allow the exact local callback URL.
 
 ## 2026-05-05 Implementation Update
 
@@ -62,7 +73,7 @@ Verification completed:
 ## Existing Project Inspection Summary
 
 - Existing project found: yes.
-- Folder: `C:\Users\akkha\selise-blocks-pnuasg\test`
+- Folder: `C:\Users\akkha\selisetest-local-run`
 - Framework: React + Vite.
 - Language: TypeScript.
 - Styling: Tailwind CSS with local UI kit.

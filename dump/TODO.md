@@ -1,6 +1,6 @@
 # TODO
 
-Last updated: 2026-05-12
+Last updated: 2026-05-13
 
 ## 2026-05-12 Google SSO Account-Specific Update
 
@@ -10,6 +10,34 @@ Last updated: 2026-05-12
 - SELISE generates Google authorization URLs with legacy `userinfo.email` and `userinfo.profile` scopes. The client now preserves SELISE state/callback values and adds standard OIDC sign-in scopes `openid email profile` before redirecting to Google.
 - Google SSO token exchange no longer sends a cached `selected-org-id` as `org_id`; that stale org/admin context could make one Google account fail differently before SELISE has issued a token.
 - If the NSU account still fails after this deploy, check SELISE IAM user/role state and the North South University Google Workspace third-party app access policy for this OAuth client.
+
+## 2026-05-12 Current Verification Pass
+
+- Active project confirmed at `C:\Users\akkha\selisetest-local-run`; no duplicate VibeBuilder project was created.
+- Local env files were inspected by key name only; no secret values were printed.
+- `.gitignore` already protects `.env*`, `DATADUMP.txt`, `raw-datadump*`, `raw_datadump*`, and `dump/raw*`.
+- Production build passed again with `npm run build`.
+- The `vidzz` reference folder contains MP4 references; the first sampled frame shows a dark website-builder/login concept with glass panels, teal/purple accents, and a polished studio-like surface.
+- Removed Table, Code / Embed, and Blog / Article from the draggable Vibe Component library so the MVP stays aligned with the final assignment and avoids deferred blog/custom-code scope.
+
+## 2026-05-13 First-Gmail Admin Policy
+
+- Replaced the old fixed-email admin helper with `scripts/bootstrap-first-gmail-admin.ps1`.
+- `run-vibebuilder.bat admin`, `admin-token`, and `admin-browser` now apply the first-Gmail-only admin policy.
+- The bootstrap selects the earliest signed-in `@gmail.com` SELISE IAM user, assigns that account the Admin role, and removes admin-like roles from other users while preserving non-admin roles.
+- The deprecated `scripts/make-asafur-admin.ps1` now delegates to the first-Gmail bootstrap and ignores the old fixed email argument.
+- Verified the bootstrap fails closed when `SELISE_ACCESS_TOKEN` is missing and makes no role changes.
+- Tried the provided SELISE PAT as a bearer token; SELISE IAM returned `401 Unauthorized`, so no role changes were made. This helper needs a current admin bearer access token from an authenticated SELISE Cloud session unless SELISE documents a different PAT header flow.
+- `npm run lint` and `npm run build` passed after the admin-policy update.
+
+## 2026-05-13 Google SSO Callback Reachability Fix
+
+- Investigated the login callback error: `The browser could not reach SELISE Identity`.
+- Local network/CORS checks showed `https://api.seliseblocks.com/idp/v1/Authentication/Token` is reachable and allows `http://localhost:3000`, `http://127.0.0.1:3000`, and the production app domain.
+- Root cause fixed in code: social-login token exchange no longer jumps to a hardcoded direct `https://api.seliseblocks.com/...` URL during local dev. It now uses the same configured auth base as the login endpoint, so local dev keeps the `/blocks-api` proxy/session-cookie path consistent.
+- Local Google sign-in now defaults to the configured SELISE production audience because the current Blocks Cloud Google credential only lists the production audience/callback. A local callback can be tested only by setting `VITE_ENABLE_LOCAL_SSO_CALLBACK=true` after SELISE Identity and Google OAuth are both configured with the exact local callback.
+- Removed hardcoded SELISE project-key fallbacks from source and Vite config; project keys must come from ignored `.env` files or deployment env.
+- Focused SSO tests, lint, and production build passed after the fix.
 
 ## 2026-05-05 Current Integration Update
 
@@ -62,7 +90,7 @@ Last updated: 2026-05-12
 - Builder UI adjusted toward the provided video reference: Construct-style editor panels, Site/Blocks tabs, grouped block library, carded canvas sections, and right-side Properties panel.
 - VibeBuilder primary route changed to `/vibe-builder` to match the provided video reference; `/admin/sites` remains as a compatibility route.
 - Sidebar menu reordered/renamed so the builder appears as `VIBE_BUILDER` under Cloud Integrated, matching the reference shell more closely.
-- Additional reference-style blocks added: Stat card, Feature list, Accordion, Tabs, Carousel, Timeline, Table, Code / Embed, and Blog / Article.
+- Additional reference-style blocks added: Stat card, Feature list, Accordion, Tabs, Carousel, and Timeline. Table, Code / Embed, and Blog / Article are intentionally not exposed in the current draggable MVP library.
 - Default generated VibeBuilder pages restyled toward the `vidzz` reference video: `YourBrand` navbar, dark hero card, services/features, stats, gallery, pricing, FAQ, CTA, and dark footer.
 - Public block rendering polished for the reference look with custom CTA buttons, visual media placeholders, carded galleries, and cleaner live-mode sections.
 - Local route check confirmed `/inventory`, `/vibe-builder`, and `/admin/sites` require login when unauthenticated; this is expected Guard behavior, not a missing route.
@@ -76,9 +104,9 @@ Last updated: 2026-05-12
 - Verified in the browser that `http://localhost:3000/vibe-builder` shows the builder sidebar, canvas, properties panel, and reference-style landing page blocks.
 - Sampled the newer `vidzz` reference video and applied a scoped dark studio visual layer to VibeBuilder screens.
 - Added animated grid/light-sweep background, glass panels, hover-lift cards, selected-block glow, drag/drop highlighting, and template picker cards.
-- Updated `run-vibebuilder.bat` with default run, `setup`, and `admin` modes.
-- Added `scripts/make-asafur-admin.ps1` to assign `asafur.rahman@northsouth.edu` to an admin-like SELISE IAM role while preserving existing roles.
-- Verified the admin helper fails closed when `SELISE_ACCESS_TOKEN` is missing and makes no role changes.
+- Updated `run-vibebuilder.bat` with default run, `setup`, `admin`, `admin-token`, and `admin-browser` modes.
+- Added the original fixed-email admin helper, then superseded it with the first-Gmail-only admin bootstrap.
+- Verified the admin helpers fail closed when `SELISE_ACCESS_TOKEN` is missing and make no role changes.
 - Lint, production build, and focused Vitest checks passed after the visual/launcher/admin-helper update.
 - Added direct double-click inline editing on the builder canvas for text-like content across the Vibe blocks.
 - Added double-click media URL editing for image/media placeholders while keeping SELISE Media upload in the properties panel.
@@ -89,8 +117,7 @@ Last updated: 2026-05-12
 
 - Waiting for authenticated browser verification of real CRUD through the existing `VibeProject`, `VibePage`, and `VibeFormSubmission` schemas.
 - Waiting for deployment/browser verification that the account-specific Google Workspace SSO patch fixes `asafur.rahman@northsouth.edu`.
-- Waiting for a current SELISE admin access token before assigning `asafur.rahman@northsouth.edu` to the Admin role.
-- Current profile evidence shows `asafur.rahman@northsouth.edu` has role `USER`; role elevation still requires a SELISE admin token or manual Access Manager update.
+- Waiting for a current SELISE admin bearer access token before applying the first-Gmail-only Admin role policy in live SELISE IAM.
 
 ## Remaining Implementation Tasks
 
@@ -108,12 +135,14 @@ Last updated: 2026-05-12
 - Configure Data Gateway access rules and RLS/CLS.
 - Confirm JSON/object field support or approved fallback structure.
 - Configure SELISE Identity roles/permissions for owner/editor/viewer.
-- Configure initial owner/admin user.
-- To assign `asafur.rahman@northsouth.edu` locally, set a current non-VITE `SELISE_ACCESS_TOKEN` in the PowerShell session and run `run-vibebuilder.bat admin`.
+- Configure initial owner/admin policy by running the first-Gmail bootstrap after the first Gmail login.
+- To apply the policy locally, set a current non-VITE `SELISE_ACCESS_TOKEN` bearer token in the PowerShell session and run `run-vibebuilder.bat admin`, or run `run-vibebuilder.bat admin-token`.
 - Configure Google SSO in SELISE Identity:
   - Create or enable the Google social/SSO credential.
   - Ensure `social` is an allowed grant type.
   - Add the correct callback URLs, including local dev `http://127.0.0.1:3000/sso/google/callback` or `http://localhost:3000/sso/google/callback` and production `https://pnuasg-dzdlq.seliseblocks.com/sso/google/callback`.
+  - Keep the local browser on one origin while testing. If the app was opened at `http://127.0.0.1:3000`, the SELISE/Google callback allowlist must include that exact origin callback.
+  - Keep `VITE_ENABLE_LOCAL_SSO_CALLBACK=false` until that local callback setup exists. With the current production-only credential, SELISE rejects local audiences with HTTP 400.
   - Configure Google OAuth client ID/secret in SELISE Cloud only.
   - Enable the credential and save/publish the Identity settings.
   - Confirm `GetLoginOptions` returns `ssoInfo` with provider `google` and a non-empty `audience`.

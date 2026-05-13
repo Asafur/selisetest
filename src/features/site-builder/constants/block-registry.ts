@@ -268,55 +268,6 @@ export const blockDefinitions: BlockDefinition[] = [
     },
   },
   {
-    type: 'table',
-    label: 'Table',
-    category: 'Content',
-    description: 'A simple comparison or information table.',
-    defaultBlock: {
-      type: 'table',
-      props: {
-        title: 'Compare options',
-        headers: ['Feature', 'Starter', 'Growth'],
-        rows: [
-          ['Pages', '3', 'Unlimited'],
-          ['Media library', 'Basic', 'Advanced'],
-          ['Publishing', 'Manual', 'Manual'],
-        ],
-      },
-      style: { backgroundColor: '#ffffff', textColor: '#111827' },
-    },
-  },
-  {
-    type: 'codeEmbed',
-    label: 'Code / Embed',
-    category: 'Content',
-    description: 'Embed custom HTML or show code snippets.',
-    defaultBlock: {
-      type: 'codeEmbed',
-      props: {
-        title: 'Embedded content',
-        code: '<div>Safe embed area</div>',
-      },
-      style: { backgroundColor: '#111827', textColor: '#ffffff' },
-    },
-  },
-  {
-    type: 'blogArticle',
-    label: 'Blog / Article',
-    category: 'Content',
-    description: 'A blog feature block with excerpt and read-more action.',
-    defaultBlock: {
-      type: 'blogArticle',
-      props: {
-        title: 'Latest insight',
-        excerpt: 'Share a concise update, case study, or announcement without turning the MVP into a blog CMS.',
-        buttonText: 'Read more',
-        buttonUrl: '#',
-      },
-      style: { backgroundColor: '#ffffff', textColor: '#111827' },
-    },
-  },
-  {
     type: 'features',
     label: 'Feature Cards',
     category: 'Marketing',
