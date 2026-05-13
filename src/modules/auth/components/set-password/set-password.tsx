@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BasePasswordForm } from '@/components/core';
+import { getProjectKey } from '@/lib/utils/project-key';
 import { useAccountActivation } from '../../hooks/use-auth';
 import { setPasswordFormDefaultValue, getSetPasswordFormValidationSchema } from './utils';
 
@@ -38,7 +39,7 @@ export const SetpasswordForm = ({ code }: Readonly<{ code: string }>) => {
       password,
       code,
       captchaCode: captchaToken ?? '',
-      projectKey: import.meta.env.VITE_X_BLOCKS_KEY || '',
+      projectKey: getProjectKey(),
     });
   };
 

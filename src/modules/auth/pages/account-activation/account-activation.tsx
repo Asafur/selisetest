@@ -5,6 +5,7 @@ import { SetpasswordForm } from '@/modules/auth/components/set-password';
 import { useValidateActivationCodeMutation } from '@/modules/auth/hooks/use-auth';
 import { useAuthState } from '@/state/client-middleware';
 import { useToast } from '@/hooks/use-toast';
+import { getProjectKey } from '@/lib/utils/project-key';
 
 export const AccountActivationPage = () => {
   const [searchParams] = useSearchParams();
@@ -27,7 +28,7 @@ export const AccountActivationPage = () => {
       try {
         const res = await validateActivation({
           activationCode: code,
-          projectKey: import.meta.env.VITE_X_BLOCKS_KEY || '',
+          projectKey: getProjectKey(),
         });
 
         if (res.userId) {

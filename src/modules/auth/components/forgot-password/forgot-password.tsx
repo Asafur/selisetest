@@ -20,6 +20,7 @@ import { Input } from '@/components/ui-kit/input';
 import { useForgotPassword } from '../../hooks/use-auth';
 import { Button } from '@/components/ui-kit/button';
 import { Captcha, useCaptcha } from '@/components/core';
+import { getProjectKey } from '@/lib/utils/project-key';
 
 /**
  * ForgotPasswordForm Component
@@ -82,7 +83,7 @@ export const ForgotpasswordForm = () => {
       const res = await mutateAsync({
         email: values.email,
         captchaCode: captchaToken || '',
-        projectKey: import.meta.env.VITE_X_BLOCKS_KEY || '',
+        projectKey: getProjectKey(),
       });
       if (res.isSuccess) navigate('/sent-email');
     } catch (_error) {

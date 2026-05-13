@@ -1,4 +1,5 @@
 import { clients } from '@/lib/https';
+import { getProjectKey } from '@/lib/utils/project-key';
 import { LanguageResponse, ModuleResponse, UilmFileParams } from '../types/language.types';
 
 /**
@@ -20,9 +21,8 @@ import { LanguageResponse, ModuleResponse, UilmFileParams } from '../types/langu
  * });
  */
 
-const projectKey = import.meta.env.VITE_X_BLOCKS_KEY || '';
-
 export const getUilmFile = async ({ language, moduleName }: UilmFileParams): Promise<any> => {
+  const projectKey = getProjectKey();
   const params = new URLSearchParams({
     Language: language,
     ModuleName: moduleName,
@@ -51,6 +51,7 @@ export const getUilmFile = async ({ language, moduleName }: UilmFileParams): Pro
  * const defaultLanguage = languages.find(lang => lang.isDefault);
  */
 export const getLanguage = async (): Promise<LanguageResponse> => {
+  const projectKey = getProjectKey();
   const params = new URLSearchParams({
     ProjectKey: projectKey,
   });
@@ -77,6 +78,7 @@ export const getLanguage = async (): Promise<LanguageResponse> => {
  * const dashboardModule = modules.find(module => module.moduleName === 'Dashboard');
  */
 export const getModule = async (): Promise<ModuleResponse> => {
+  const projectKey = getProjectKey();
   const params = new URLSearchParams({
     ProjectKey: projectKey,
   });

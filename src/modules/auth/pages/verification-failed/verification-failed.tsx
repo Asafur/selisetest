@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CircleCheckBig } from 'lucide-react';
 import { Button } from '@/components/ui-kit/button';
 import { useResendActivation } from '@/modules/auth/hooks/use-auth';
+import { getProjectKey } from '@/lib/utils/project-key';
 import emailSentIcon from '@/assets/images/verification-failed.svg';
 
 export const VerificationFailed = () => {
@@ -19,7 +20,7 @@ export const VerificationFailed = () => {
     try {
       await resendActivation({
         userId,
-        projectKey: import.meta.env.VITE_X_BLOCKS_KEY || '',
+        projectKey: getProjectKey(),
       });
       setIsResendSuccess(true);
     } catch (error) {

@@ -1,3 +1,5 @@
+import { getSeliseProjectKey } from '@/lib/selise-config';
+
 // Key used in localStorage for storing the project key
 export const LOCAL_STORAGE_PROJECT_KEY = 'projectKey';
 
@@ -10,7 +12,7 @@ export const getProjectKey = (): string => {
 
   return (
     window.localStorage.getItem(LOCAL_STORAGE_PROJECT_KEY) ??
-    import.meta.env.VITE_X_BLOCKS_KEY ??
+    getSeliseProjectKey() ??
     ''
   );
 };
@@ -32,7 +34,7 @@ export const setProjectKey = (key: string): void => {
 export const initializeProjectKey = (): void => {
   if (typeof window === 'undefined') return;
 
-  const envKey = import.meta.env.VITE_X_BLOCKS_KEY;
+  const envKey = getSeliseProjectKey();
   if (envKey) {
     setProjectKey(envKey);
   }

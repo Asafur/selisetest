@@ -1,4 +1,5 @@
 import { clients, HttpError } from '@/lib/https';
+import { getProjectKey } from '@/lib/utils/project-key';
 import { useAuthStore } from '@/state/store/auth';
 import { getSeliseApiBaseUrl, getSeliseProjectKey } from '@/lib/selise-config';
 import { readErrorPayload, readJsonResponse } from '@/lib/http-response';
@@ -376,7 +377,7 @@ export const resetPassword = async (data: { code: string; password: string }) =>
   const payload = {
     ...data,
     logoutFromAllDevices: true,
-    ProjectKey: projectKey,
+    ProjectKey: getProjectKey(),
   };
 
   const url = '/idp/v1/Iam/ResetPassword';
@@ -441,5 +442,5 @@ export const signupByEmail = (payload: ISignupByEmailPayload): Promise<ISignupBy
 };
 
 export const getSignupSettings = (): Promise<IGetSignUpSettingResponse> => {
-  return clients.get(`/idp/v1/Iam/GetSignUpSetting?ProjectKey=${projectKey}`);
+  return clients.get(`/idp/v1/Iam/GetSignUpSetting?ProjectKey=${getProjectKey()}`);
 };
