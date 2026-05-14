@@ -1,5 +1,6 @@
 // Key used in localStorage for storing the project key
 export const LOCAL_STORAGE_PROJECT_KEY = 'projectKey';
+const PUBLIC_BLOCKS_KEY_FALLBACK = 'P8d53101e85884a6fbb63551ddc61c63f';
 const PROJECT_KEY_PLACEHOLDERS = new Set(['', '<X_BLOCKS_KEY>', '<VITE_X_BLOCKS_KEY>']);
 
 const getEnvProjectKey = (): string =>
@@ -9,7 +10,7 @@ const getEnvProjectKey = (): string =>
   import.meta.env.VITE_X_BLOCKS_KEY ||
   import.meta.env.VITE_SELISE_BLOCKS_KEY ||
   import.meta.env.VITE_SELISE_PROJECT_KEY ||
-  '';
+  PUBLIC_BLOCKS_KEY_FALLBACK;
 
 /**
  * Retrieves the project key from localStorage.

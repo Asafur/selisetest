@@ -6,6 +6,7 @@ const path = require('path');
 const env = process.env.BUILD_ENV || 'prod';
 const envFile = path.join(__dirname, `.env.${env}`);
 const targetFile = path.join(__dirname, '.env');
+const PUBLIC_BLOCKS_KEY_FALLBACK = 'P8d53101e85884a6fbb63551ddc61c63f';
 
 const pick = (...names) => {
   for (const name of names) {
@@ -42,7 +43,7 @@ const projectKey = normalizeBlocksKey(
     'SELISE_PROJECT_KEY',
     'PROJECT_KEY',
     'BLOCKS_KEY'
-  )
+  ) || PUBLIC_BLOCKS_KEY_FALLBACK
 );
 
 if (!projectKey) {

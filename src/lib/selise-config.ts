@@ -1,6 +1,7 @@
 const DEFAULT_SELISE_API_BASE_URL = '/blocks-api';
 const SELISE_API_ORIGIN = 'https://api.seliseblocks.com';
 const LOCAL_STORAGE_PROJECT_KEY = 'projectKey';
+const PUBLIC_BLOCKS_KEY_FALLBACK = 'P8d53101e85884a6fbb63551ddc61c63f';
 const PROJECT_KEY_PLACEHOLDERS = new Set(['', '<X_BLOCKS_KEY>', '<VITE_X_BLOCKS_KEY>']);
 
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
@@ -55,11 +56,12 @@ export const getSeliseDataGatewayUrl = (): string => {
 };
 
 export const getSeliseProjectKey = (): string => {
-  const configuredKey = pickRuntimeOrEnv(
-    'VITE_X_BLOCKS_KEY',
-    'VITE_SELISE_BLOCKS_KEY',
-    'VITE_SELISE_PROJECT_KEY'
-  );
+  const configuredKey =
+    pickRuntimeOrEnv(
+      'VITE_X_BLOCKS_KEY',
+      'VITE_SELISE_BLOCKS_KEY',
+      'VITE_SELISE_PROJECT_KEY'
+    ) || PUBLIC_BLOCKS_KEY_FALLBACK;
 
   if (!PROJECT_KEY_PLACEHOLDERS.has(configuredKey)) {
     return configuredKey;

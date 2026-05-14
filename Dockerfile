@@ -76,7 +76,7 @@ write_var() {
   printf '  "%s": "%s",\n' "$name" "$(json_escape "$value")" >> /usr/share/nginx/html/runtime-config.js
 }
 
-raw_key="${VITE_X_BLOCKS_KEY:-${X_BLOCKS_KEY:-${SELISE_X_BLOCKS_KEY:-${VITE_SELISE_BLOCKS_KEY:-${SELISE_BLOCKS_KEY:-${VITE_SELISE_PROJECT_KEY:-${SELISE_PROJECT_KEY:-${PROJECT_KEY:-${BLOCKS_KEY:-}}}}}}}}}"
+raw_key="${VITE_X_BLOCKS_KEY:-${X_BLOCKS_KEY:-${SELISE_X_BLOCKS_KEY:-${VITE_SELISE_BLOCKS_KEY:-${SELISE_BLOCKS_KEY:-${VITE_SELISE_PROJECT_KEY:-${SELISE_PROJECT_KEY:-${PROJECT_KEY:-${BLOCKS_KEY:-P8d53101e85884a6fbb63551ddc61c63f}}}}}}}}}"
 blocks_key="$(printf '%s' "$raw_key" | sed 's/-X-Blocks-Key$//')"
 api_base="${VITE_API_BASE_URL:-${VITE_BLOCKS_API_URL:-/blocks-api}}"
 
