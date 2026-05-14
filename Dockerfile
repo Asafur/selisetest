@@ -60,3 +60,39 @@ FROM nginx:stable-alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+RUN cat > /docker-entrypoint.d/10-vibebuilder-runtime-config.sh <<'EOF'
+#!/bin/sh
+set -eu
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+write_var() {
+  name="$1"
+  value="${2:-}"
+  [ -n "$value" ] || return 0
+  printf '  "%s": "%s",\n' "$name" "$(json_escape "$value")" >> /usr/share/nginx/html/runtime-config.js
+}
+
+raw_key="${VITE_X_BLOCKS_KEY:-${X_BLOCKS_KEY:-${SELISE_X_BLOCKS_KEY:-${VITE_SELISE_BLOCKS_KEY:-${SELISE_BLOCKS_KEY:-${VITE_SELISE_PROJECT_KEY:-${SELISE_PROJECT_KEY:-${PROJECT_KEY:-${BLOCKS_KEY:-}}}}}}}}}"
+blocks_key="$(printf '%s' "$raw_key" | sed 's/-X-Blocks-Key$//')"
+api_base="${VITE_API_BASE_URL:-${VITE_BLOCKS_API_URL:-/blocks-api}}"
+
+cat > /usr/share/nginx/html/runtime-config.js <<'JS'
+window.__VIBEBUILDER_CONFIG__ = {
+JS
+write_var "VITE_X_BLOCKS_KEY" "$blocks_key"
+write_var "VITE_API_BASE_URL" "$api_base"
+write_var "VITE_BLOCKS_API_URL" "${VITE_BLOCKS_API_URL:-$api_base}"
+write_var "VITE_DATA_GATEWAY_URL" "${VITE_DATA_GATEWAY_URL:-}"
+write_var "VITE_GRAPHQL_ENDPOINT" "${VITE_GRAPHQL_ENDPOINT:-}"
+write_var "VITE_PROJECT_SLUG" "${VITE_PROJECT_SLUG:-${PROJECT_SLUG:-pnuasg}}"
+write_var "VITE_SELISE_APP_DOMAIN" "${VITE_SELISE_APP_DOMAIN:-${SELISE_APP_DOMAIN:-${APP_DOMAIN:-https://pnuasg-dzdlq.seliseblocks.com}}}"
+cat >> /usr/share/nginx/html/runtime-config.js <<'JS'
+};
+JS
+EOF
+
+RUN chmod +x /docker-entrypoint.d/10-vibebuilder-runtime-config.sh

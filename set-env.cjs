@@ -46,10 +46,9 @@ const projectKey = normalizeBlocksKey(
 );
 
 if (!projectKey) {
-  console.error(
-    'Missing VITE_X_BLOCKS_KEY. Add the SELISE X-Blocks-Key as a build/deployment environment variable before deploying.'
+  console.warn(
+    'VITE_X_BLOCKS_KEY was not available during Docker build. Continuing because SELISE Cloud may provide it at container runtime.'
   );
-  process.exit(1);
 }
 
 const generatedValues = {

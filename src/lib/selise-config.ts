@@ -7,6 +7,22 @@ const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '');
 
 const isBrowser = () => typeof window !== 'undefined';
 
+const getRuntimeConfig = () => (isBrowser() ? window.__VIBEBUILDER_CONFIG__ : undefined);
+
+const pickRuntimeOrEnv = (...names: Array<keyof NonNullable<Window['__VIBEBUILDER_CONFIG__']>>) => {
+  const runtimeConfig = getRuntimeConfig();
+
+  for (const name of names) {
+    const runtimeValue = runtimeConfig?.[name];
+    if (runtimeValue) return runtimeValue;
+
+    const envValue = import.meta.env[name];
+    if (envValue) return envValue;
+  }
+
+  return '';
+};
+
 const resolveSameOriginProxyUrl = (configuredUrl: string): string => {
   const trimmedUrl = trimTrailingSlash(configuredUrl);
 
@@ -25,29 +41,25 @@ const resolveSameOriginProxyUrl = (configuredUrl: string): string => {
 };
 
 export const getSeliseApiBaseUrl = (): string => {
-  const configuredUrl =
-    import.meta.env.VITE_API_BASE_URL ||
-    import.meta.env.VITE_BLOCKS_API_URL ||
-    DEFAULT_SELISE_API_BASE_URL;
+  const configuredUrl = pickRuntimeOrEnv('VITE_API_BASE_URL', 'VITE_BLOCKS_API_URL') || DEFAULT_SELISE_API_BASE_URL;
 
   return resolveSameOriginProxyUrl(configuredUrl);
 };
 
 export const getSeliseDataGatewayUrl = (): string => {
   const configuredUrl =
-    import.meta.env.VITE_DATA_GATEWAY_URL ||
-    import.meta.env.VITE_GRAPHQL_ENDPOINT ||
+    pickRuntimeOrEnv('VITE_DATA_GATEWAY_URL', 'VITE_GRAPHQL_ENDPOINT') ||
     `${getSeliseApiBaseUrl()}/uds/v1/gateway`;
 
   return resolveSameOriginProxyUrl(configuredUrl);
 };
 
 export const getSeliseProjectKey = (): string => {
-  const configuredKey =
-    import.meta.env.VITE_X_BLOCKS_KEY ||
-    import.meta.env.VITE_SELISE_BLOCKS_KEY ||
-    import.meta.env.VITE_SELISE_PROJECT_KEY ||
-    '';
+  const configuredKey = pickRuntimeOrEnv(
+    'VITE_X_BLOCKS_KEY',
+    'VITE_SELISE_BLOCKS_KEY',
+    'VITE_SELISE_PROJECT_KEY'
+  );
 
   if (!PROJECT_KEY_PLACEHOLDERS.has(configuredKey)) {
     return configuredKey;

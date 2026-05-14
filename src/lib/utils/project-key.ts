@@ -3,6 +3,9 @@ export const LOCAL_STORAGE_PROJECT_KEY = 'projectKey';
 const PROJECT_KEY_PLACEHOLDERS = new Set(['', '<X_BLOCKS_KEY>', '<VITE_X_BLOCKS_KEY>']);
 
 const getEnvProjectKey = (): string =>
+  (typeof window !== 'undefined' && window.__VIBEBUILDER_CONFIG__?.VITE_X_BLOCKS_KEY) ||
+  (typeof window !== 'undefined' && window.__VIBEBUILDER_CONFIG__?.VITE_SELISE_BLOCKS_KEY) ||
+  (typeof window !== 'undefined' && window.__VIBEBUILDER_CONFIG__?.VITE_SELISE_PROJECT_KEY) ||
   import.meta.env.VITE_X_BLOCKS_KEY ||
   import.meta.env.VITE_SELISE_BLOCKS_KEY ||
   import.meta.env.VITE_SELISE_PROJECT_KEY ||
