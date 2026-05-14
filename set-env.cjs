@@ -16,6 +16,8 @@ const pick = (...names) => {
   return '';
 };
 
+const normalizeBlocksKey = (value) => value.replace(/-X-Blocks-Key$/i, '').trim();
+
 if (fs.existsSync(envFile)) {
   fs.copyFileSync(envFile, targetFile);
   console.log(`Successfully set environment: ${path.basename(envFile)} -> .env`);
@@ -29,16 +31,18 @@ const projectSlug = pick('VITE_PROJECT_SLUG', 'PROJECT_SLUG') || 'pnuasg';
 const appDomain =
   pick('VITE_SELISE_APP_DOMAIN', 'SELISE_APP_DOMAIN', 'APP_DOMAIN') ||
   'https://pnuasg-dzdlq.seliseblocks.com';
-const projectKey = pick(
-  'VITE_X_BLOCKS_KEY',
-  'X_BLOCKS_KEY',
-  'SELISE_X_BLOCKS_KEY',
-  'VITE_SELISE_BLOCKS_KEY',
-  'SELISE_BLOCKS_KEY',
-  'VITE_SELISE_PROJECT_KEY',
-  'SELISE_PROJECT_KEY',
-  'PROJECT_KEY',
-  'BLOCKS_KEY'
+const projectKey = normalizeBlocksKey(
+  pick(
+    'VITE_X_BLOCKS_KEY',
+    'X_BLOCKS_KEY',
+    'SELISE_X_BLOCKS_KEY',
+    'VITE_SELISE_BLOCKS_KEY',
+    'SELISE_BLOCKS_KEY',
+    'VITE_SELISE_PROJECT_KEY',
+    'SELISE_PROJECT_KEY',
+    'PROJECT_KEY',
+    'BLOCKS_KEY'
+  )
 );
 
 if (!projectKey) {

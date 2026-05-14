@@ -25,8 +25,10 @@ VITE_SELISE_APP_DOMAIN=https://pnuasg-dzdlq.seliseblocks.com
 VITE_ENABLE_LOCAL_SSO_CALLBACK=false
 ```
 
-`VITE_X_BLOCKS_KEY` is required. The build intentionally does not keep a
-project-key fallback in source code.
+`VITE_X_BLOCKS_KEY` is required. In SELISE Cloud, add the dashboard value as a
+deployment/build environment variable named exactly `VITE_X_BLOCKS_KEY`. Do not
+name the variable `X-Blocks-Key`, and do not paste the label into the value. The
+build intentionally does not keep a project-key fallback in source code.
 
 For local dev, Vite forwards `/blocks-api` to `https://api.seliseblocks.com`. For
 the deployed SELISE container, `nginx.conf` does the same forwarding. If SELISE
